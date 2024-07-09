@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import HttpError from "../helpers/HttpError";
-import User from "../models/user";
+import HttpError from "../helpers/HttpError.js";
+import User from "../models/user.js";
 import "dotenv/config";
 
 const auth = (req, res, next) => {
