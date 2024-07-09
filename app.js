@@ -1,7 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-// import routes from "./routes/index.js";
+import router from "./routes/index.js";
 // import swaggerUi from "swagger-ui-express";
 // import swaggerDocument from "./swagger.json" assert { type: "json" };
 
@@ -10,6 +10,8 @@ const app = express();
 app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
+
+app.use("/api", router);
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
