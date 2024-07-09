@@ -21,7 +21,6 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
-  console.log(user);
   if (!user) throw HttpError(401, "Email or password is wrong");
 
   const comparePassword = await bcrypt.compare(password, user.password);
