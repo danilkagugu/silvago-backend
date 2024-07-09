@@ -49,5 +49,24 @@ export const login = async (req, res, next) => {
     { new: true }
   );
 
-  res.status(201).json({ user });
+  res.status(201).json({
+    token,
+    refreshToken,
+    user: {
+      name: user.name,
+      serName: user.serName,
+      phone: user.phone,
+      email: user.email,
+      password: user.password,
+    },
+  });
+};
+
+export const logout = async (req, res, next) => {
+  try {
+    await User.findByIdAndUpdate(req.user.id, { token: null }, { new: true });
+    res.status(204).end();
+  } catch (error) {
+    next(error);
+  }
 };
