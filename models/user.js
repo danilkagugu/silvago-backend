@@ -27,6 +27,15 @@ const userShema = new Schema({
     type: String,
     default: null,
   },
+  area: {
+    type: String,
+  },
+  city: {
+    type: String,
+  },
+  office: {
+    type: String,
+  },
 });
 
 const User = model("user", userShema);
