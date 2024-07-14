@@ -27,3 +27,35 @@ export const getProducts = async (req, res, next) => {
     next(error);
   }
 };
+
+export const addFavoriteProduct = async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    product.favorite = !product.favorite;
+    await product.save();
+    res.status(200).json(product);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// export const addFavoriteProduct = async (req, res, next) => {
+//   try {
+//     const product = await Product.findByIdAndUpdate(
+//       req.params.id,
+//       {
+//         favorite: true,
+//       },
+//       { new: true }
+//     );
+//     if (!product) {
+//       return res.status(404).json({ message: "Product not found" });
+//     }
+//     res.status(200).json(product);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
