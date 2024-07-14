@@ -3,7 +3,7 @@ import HttpError from "../helpers/HttpError.js";
 import User from "../models/user.js";
 import "dotenv/config";
 
-const auth = (req, res, next) => {
+const authMiddlewares = (req, res, next) => {
   const { authorization = "" } = req.headers;
 
   const [bearer, token] = authorization.split(" ", 2);
@@ -28,4 +28,4 @@ const auth = (req, res, next) => {
   });
 };
 
-export default auth;
+export default authMiddlewares;

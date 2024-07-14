@@ -13,6 +13,9 @@ export const getCurrentUser = async (req, res, next) => {
       phone: user.phone,
       email: user.email,
       password: user.password,
+      area: user.area,
+      city: user.city,
+      office: user.office,
     };
     res.status(200).json(feedbackMessage).end();
   } catch (error) {

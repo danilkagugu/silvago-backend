@@ -28,6 +28,10 @@ const productSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "user",
   },
+  favorite: {
+    type: Boolean,
+    default: false
+  },
 });
 
 const Product = model("product", productSchema);

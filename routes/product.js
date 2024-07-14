@@ -1,10 +1,21 @@
 import express from "express";
-import { createProduct, getProducts } from "../conrollers/product.js";
-import auth from "../middlewares/auth.js";
+import {
+  addFavoriteProduct,
+  addProductToBasket,
+  createProduct,
+  getBasket,
+  getProductById,
+  getProducts,
+} from "../conrollers/product.js";
+import authMiddlewares from "../middlewares/authMiddlewares.js";
 
 const productRouter = express.Router();
 
-productRouter.post("/", auth, createProduct);
+productRouter.post("/", authMiddlewares, createProduct);
 productRouter.get("/", getProducts);
+productRouter.get("/product/:id", getProductById);
+productRouter.get("/basket", authMiddlewares, getBasket);
+productRouter.patch("/:id/favorite", addFavoriteProduct);
+productRouter.post("/:id/basket", authMiddlewares, addProductToBasket);
 
 export default productRouter;

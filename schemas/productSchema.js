@@ -7,4 +7,5 @@ export const createProductSchema = Joi.object({
   category: Joi.string(),
   subcategory: Joi.string(),
   image: Joi.string(),
+  favorite: Joi.boolean(),
 });
