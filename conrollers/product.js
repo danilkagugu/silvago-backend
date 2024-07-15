@@ -64,6 +64,7 @@ export const getProductById = async (req, res, next) => {
 
 export const addProductToBasket = async (req, res, next) => {
   try {
+    const { quantity } = req.body;
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -76,9 +77,9 @@ export const addProductToBasket = async (req, res, next) => {
       (item) => item.product.toString() === product._id.toString()
     );
     if (indexProduct >= 0) {
-      basket.products[indexProduct].quantity += 1;
+      basket.products[indexProduct].quantity += quantity;
     } else {
-      basket.products.push({ product: product._id, quantity: 1 });
+      basket.products.push({ product: product._id, quantity });
     }
     await basket.save();
     res.status(200).json(basket);
@@ -95,6 +96,34 @@ export const getBasket = async (req, res, next) => {
       return res.status(404).json({ message: "Basket not found" });
     }
     res.json(basket);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProductQuantity = async (req, res, next) => {
+  try {
+    const { quantity } = req.body;
+    const productId = req.params.id;
+    const userId = req.user.id;
+
+    let basket = await Basket.findOne({ owner: userId });
+    if (!basket) {
+      return res.status(404).json({ message: "Basket not found" });
+    }
+
+    const productIndex = basket.products.findIndex(
+      (item) => item.product.toString() === productId
+    );
+
+    if (productIndex === -1) {
+      return res.status(404).json({ message: "Product not found in basket" });
+    }
+
+    basket.products[productIndex].quantity = quantity;
+
+    await basket.save();
+    res.status(200).json(basket);
   } catch (error) {
     next(error);
   }
