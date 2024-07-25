@@ -1,4 +1,5 @@
 import Basket from "../models/basket.js";
+import Order from "../models/orderSchema.js";
 import Product from "../models/product.js";
 import { createProductSchema } from "../schemas/productSchema.js";
 
@@ -97,6 +98,55 @@ export const getBasket = async (req, res, next) => {
     }
     res.json(basket);
   } catch (error) {
+    next(error);
+  }
+};
+
+export const sendOrder = async (req, res, next) => {
+  try {
+    const { user } = req.body;
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid input data" });
+    }
+
+    // Перевіряємо чи є кошик у користувача
+    const basketFromDB = await Basket.findOne({ owner: req.user.id }).populate(
+      "products.product"
+    );
+    console.log("basketFromDB: ", basketFromDB);
+    if (!basketFromDB || basketFromDB.products.length === 0) {
+      return res.status(400).json({ message: "Basket is empty" });
+    }
+
+    // Створюємо нове замовлення з продуктами з кошика
+    const newOrder = new Order({
+      owner: req.user.id,
+      user,
+      basket: basketFromDB.products.map((productItem) => ({
+        product: productItem.product._id,
+        productName: productItem.product.name,
+        quantity: productItem.quantity,
+      })),
+    });
+
+    const order = await newOrder.save();
+
+    // Очищуємо кошик після створення замовлення
+    basketFromDB.products = [];
+    await basketFromDB.save();
+
+    res.status(201).json({ message: "Order created successfully", order });
+  } catch (error) {
+    console.error("Error creating order:", error);
+
+    if (!res.headersSent) {
+      res.status(500).json({
+        message: "Internal Server Error",
+        error: error.message,
+      });
+    }
+
     next(error);
   }
 };
