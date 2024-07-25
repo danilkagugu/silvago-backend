@@ -6,6 +6,8 @@ import {
   getBasket,
   getProductById,
   getProducts,
+  sendOrder,
+  updateProductQuantity,
 } from "../conrollers/product.js";
 import authMiddlewares from "../middlewares/authMiddlewares.js";
 
@@ -17,5 +19,7 @@ productRouter.get("/product/:id", getProductById);
 productRouter.get("/basket", authMiddlewares, getBasket);
 productRouter.patch("/:id/favorite", addFavoriteProduct);
 productRouter.post("/:id/basket", authMiddlewares, addProductToBasket);
+productRouter.patch("/basket/:id", authMiddlewares, updateProductQuantity);
+productRouter.post("/basket/order", authMiddlewares, sendOrder);
 
 export default productRouter;
