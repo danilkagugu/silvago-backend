@@ -1,40 +1,51 @@
 import { model, Schema } from "mongoose";
 
-const orderSchema = new Schema({
-  owner: {
-    type: Schema.Types.ObjectId,
-    ref: "user",
-  },
-  user: {
-    name: { type: String, required: true },
-    serName: { type: String, required: true },
-    phone: { type: String, required: true },
-    email: { type: String, required: true },
-    address: {
-      area: { type: String, required: true },
-      city: { type: String, required: true },
-      office: { type: String, required: true },
+const orderSchema = new Schema(
+  {
+    // orderNumber: { type: Number, unique: true },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
     },
-  },
-  basket: [
-    {
-      product: {
-        type: Schema.Types.ObjectId,
-        ref: "product",
-        required: true,
-      },
-      productName: {
-        type: String,
-      },
-      quantity: {
-        type: Number,
-        default: 1,
+    user: {
+      name: { type: String, required: true },
+      serName: { type: String, required: true },
+      phone: { type: String, required: true },
+      email: { type: String, required: true },
+      address: {
+        area: { type: String, required: true },
+        city: { type: String, required: true },
+        office: { type: String, required: true },
       },
     },
-  ],
-  totalAmount: { type: String },
-  status: { type: String, default: "Pending" },
-});
+    basket: [
+      {
+        product: {
+          type: Schema.Types.ObjectId,
+          ref: "product",
+          required: true,
+        },
+        productName: {
+          type: String,
+        },
+        productPrice: {
+          type: Number,
+        },
+        image: {
+          type: String,
+        },
+        quantity: {
+          type: Number,
+          default: 1,
+        },
+      },
+    ],
+    totalAmount: { type: Number },
+    status: { type: String, default: "Pending" },
+    allQuantity: { type: Number, default: 1 },
+  },
+  { timestamps: true }
+);
 
 const Order = model("order", orderSchema);
 

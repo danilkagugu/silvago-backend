@@ -119,6 +119,10 @@ export const sendOrder = async (req, res, next) => {
       return res.status(400).json({ message: "Basket is empty" });
     }
 
+    const totalQuantity = basketFromDB.products.reduce((total, productItem) => {
+      return total + productItem.quantity;
+    }, 0);
+
     // Створюємо нове замовлення з продуктами з кошика
     const newOrder = new Order({
       owner: req.user.id,
@@ -126,12 +130,20 @@ export const sendOrder = async (req, res, next) => {
       basket: basketFromDB.products.map((productItem) => ({
         product: productItem.product._id,
         productName: productItem.product.name,
+        productPrice: productItem.product.price,
+        image: productItem.product.image,
         quantity: productItem.quantity,
       })),
+      totalAmount: basketFromDB.products.reduce((total, productItem) => {
+        if (productItem.product && productItem.product.price) {
+          return total + productItem.quantity * productItem.product.price;
+        }
+        return total;
+      }, 0),
+      allQuantity: totalQuantity,
     });
 
     const order = await newOrder.save();
-
     // Очищуємо кошик після створення замовлення
     basketFromDB.products = [];
     await basketFromDB.save();
@@ -147,6 +159,18 @@ export const sendOrder = async (req, res, next) => {
       });
     }
 
+    next(error);
+  }
+};
+
+export const getOrder = async (req, res, next) => {
+  try {
+    const order = await Order.find({ owner: req.user.id });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    res.json(order);
+  } catch (error) {
     next(error);
   }
 };
