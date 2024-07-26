@@ -4,6 +4,7 @@ import {
   addProductToBasket,
   createProduct,
   getBasket,
+  getOrder,
   getProductById,
   getProducts,
   sendOrder,
@@ -21,5 +22,6 @@ productRouter.patch("/:id/favorite", addFavoriteProduct);
 productRouter.post("/:id/basket", authMiddlewares, addProductToBasket);
 productRouter.patch("/basket/:id", authMiddlewares, updateProductQuantity);
 productRouter.post("/basket/order", authMiddlewares, sendOrder);
+productRouter.get("/order", authMiddlewares, getOrder);
 
 export default productRouter;
