@@ -3,6 +3,7 @@ import { model, Schema } from "mongoose";
 const productSchema = new Schema({
   name: {
     type: String,
+    required: true,
   },
   description: {
     type: String,
@@ -24,13 +25,14 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  owner: {
-    type: Schema.Types.ObjectId,
-    ref: "user",
+  quantity: {
+    type: Number,
+    default: 0,
+    required: true,
   },
-  favorite: {
-    type: Boolean,
-    default: false
+  discount: {
+    type: Number,
+    default: 0,
   },
 });
 
