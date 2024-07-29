@@ -3,7 +3,9 @@ import {
   addFavoriteProduct,
   addProductToBasket,
   createProduct,
+  deleteFavoriteProduct,
   getBasket,
+  getFavoriteProducts,
   getOrder,
   getProductById,
   getProducts,
@@ -16,9 +18,11 @@ const productRouter = express.Router();
 
 productRouter.post("/", authMiddlewares, createProduct);
 productRouter.get("/", getProducts);
+productRouter.get("/favorite", authMiddlewares, getFavoriteProducts);
+productRouter.delete("/favorite/:id", authMiddlewares, deleteFavoriteProduct);
 productRouter.get("/product/:id", getProductById);
 productRouter.get("/basket", authMiddlewares, getBasket);
-productRouter.patch("/:id/favorite", addFavoriteProduct);
+productRouter.post("/:id/favorite", authMiddlewares, addFavoriteProduct);
 productRouter.post("/:id/basket", authMiddlewares, addProductToBasket);
 productRouter.patch("/basket/:id", authMiddlewares, updateProductQuantity);
 productRouter.post("/basket/order", authMiddlewares, sendOrder);

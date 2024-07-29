@@ -1,4 +1,5 @@
 import Basket from "../models/basket.js";
+import FavoriteProduct from "../models/favoritesProducts.js";
 import Order from "../models/orderSchema.js";
 import Product from "../models/product.js";
 import { createProductSchema } from "../schemas/productSchema.js";
@@ -29,16 +30,65 @@ export const getProducts = async (req, res, next) => {
     next(error);
   }
 };
+export const getFavoriteProducts = async (req, res, next) => {
+  try {
+    const products = await FavoriteProduct.find({ owner: req.user.id });
+
+    res.json(products);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const addFavoriteProduct = async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.id);
+    console.log("product: ", product);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    product.favorite = !product.favorite;
-    await product.save();
-    res.status(200).json(product);
+    const addProduct = await FavoriteProduct.findOneAndUpdate(
+      { owner: req.user.id },
+      {
+        $addToSet: {
+          products: [
+            {
+              product: product._id,
+              productName: product.name,
+              productPrice: product.price,
+              image: product.image,
+            },
+          ],
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
+
+    res.status(200).json(addProduct);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteFavoriteProduct = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const product = await FavoriteProduct.findOneAndUpdate(
+      { owner: req.user.id },
+      {
+        $pull: {
+          products: { product: id },
+        },
+      },
+      { new: true }
+    );
+    if (!product) {
+      return res.status(404).json({ message: "Favorite product not found" });
+    }
+    res.json(product);
   } catch (error) {
     next(error);
   }
