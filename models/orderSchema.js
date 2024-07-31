@@ -41,7 +41,7 @@ const orderSchema = new Schema(
       },
     ],
     totalAmount: { type: Number },
-    status: { type: String, default: "Pending" },
+    status: { type: String, default: "Прийнято" },
     allQuantity: { type: Number, default: 1 },
   },
   { timestamps: true }

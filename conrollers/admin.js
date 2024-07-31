@@ -1,5 +1,7 @@
 import cloudinary from "../cloudinary.js";
 import HttpError from "../helpers/HttpError.js";
+import Brand from "../models/brand.js";
+import Category from "../models/category.js";
 import Product from "../models/product.js";
 import User from "../models/user.js";
 import { createProductSchema } from "../schemas/productSchema.js";
@@ -15,12 +17,17 @@ export const createProductAdmin = async (req, res, next) => {
     await fs.unlink(req.file.path);
     const newRecord = await Product.create({
       name: req.body.name,
-      description: req.body.description,
-      price: req.body.price,
+      image: result.secure_url,
       category: req.body.category,
       subcategory: req.body.subcategory,
-      image: result.secure_url,
+      brand: req.body.brand,
+      country: req.body.country,
+      description: req.body.description,
+      price: req.body.price,
+      quantity: req.body.quantity,
+      discount: req.body.discount,
     });
+
     res.status(201).json({ data: newRecord });
   } catch (error) {
     next(error);
@@ -76,9 +83,8 @@ export const updateProductsAdmin = async (req, res, next) => {
       discount: updatedProduct.discount,
       image: updatedProduct.image,
     };
-    console.log(feedbackMessage);
     res.status(200).json({
-      message: "User updated successfully",
+      message: "Product updated successfully",
       data: feedbackMessage,
     });
   } catch (error) {
@@ -99,7 +105,6 @@ export const getUsers = async (req, res, next) => {
 export const getProducts = async (req, res, next) => {
   try {
     const products = await Product.find();
-    console.log("products: ", products);
 
     res.json(products);
   } catch (error) {
@@ -153,6 +158,114 @@ export const delManyProducts = async (req, res, next) => {
     }
 
     res.status(200).json({ message: "Продукти успішно видалені" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createCategoryAdmin = async (req, res, next) => {
+  try {
+    const newCategory = await Category.create(req.body);
+
+    res.status(201).json(newCategory);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createBrandAdmin = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "Image file is required." });
+    }
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "image",
+    });
+    await fs.unlink(req.file.path);
+    const newBrand = await Brand.create({
+      name: req.body.name,
+      image: result.secure_url,
+    });
+
+    res.status(201).json({ data: newBrand });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getBrands = async (req, res, next) => {
+  try {
+    const brands = await Brand.find();
+
+    res.json(brands);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOneBrand = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const brand = await Brand.findOne({ _id: id });
+    if (!brand) {
+      return res.status(404).json({ message: "Brand not found" });
+    }
+    const brandById = {
+      id: brand._id,
+      name: brand.name,
+
+      image: brand.image,
+    };
+    res.status(200).json(brandById).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const delBrand = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const brands = await Brand.findByIdAndDelete({ _id: id });
+
+    res.json(brands);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateBrandsAdmin = async (req, res, next) => {
+  try {
+    const { name } = req.body;
+    let image = null;
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "images",
+      });
+
+      image = result.secure_url;
+
+      await fs.unlink(req.file.path);
+    }
+    const updateData = {
+      ...(name && { name }),
+      ...(image && { image }),
+    };
+    if (typeof error !== "undefined") {
+      throw HttpError(400, error.details[0].message);
+    }
+    const { id } = req.params;
+    const updatedBrand = await Brand.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
+    const feedbackMessage = {
+      id: updatedBrand._id,
+      name: updatedBrand.name,
+      image: updatedBrand.image,
+    };
+    res.status(200).json({
+      message: "Brand updated successfully",
+      data: feedbackMessage,
+    });
   } catch (error) {
     next(error);
   }

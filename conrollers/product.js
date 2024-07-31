@@ -1,4 +1,5 @@
 import Basket from "../models/basket.js";
+import Category from "../models/category.js";
 import FavoriteProduct from "../models/favoritesProducts.js";
 import Order from "../models/orderSchema.js";
 import Product from "../models/product.js";
@@ -15,6 +16,7 @@ export const createProduct = async (req, res, next) => {
       ...req.body,
       owner: req.user.id,
     });
+
     res.status(201).json(newRecord);
   } catch (error) {
     next(error);
@@ -43,7 +45,6 @@ export const getFavoriteProducts = async (req, res, next) => {
 export const addFavoriteProduct = async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.id);
-    console.log("product: ", product);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -103,10 +104,15 @@ export const getProductById = async (req, res, next) => {
     const productById = {
       id: product._id,
       name: product.name,
+      category: product.category,
       description: product.description,
       price: product.price,
       image: product.image,
+      quantity: product.quantity,
+      brand: product.brand,
+      country: product.country,
     };
+
     res.status(200).json(productById).end();
   } catch (error) {
     next(error);
@@ -164,7 +170,6 @@ export const sendOrder = async (req, res, next) => {
     const basketFromDB = await Basket.findOne({ owner: req.user.id }).populate(
       "products.product"
     );
-    console.log("basketFromDB: ", basketFromDB);
     if (!basketFromDB || basketFromDB.products.length === 0) {
       return res.status(400).json({ message: "Basket is empty" });
     }
@@ -250,5 +255,14 @@ export const updateProductQuantity = async (req, res, next) => {
     res.status(200).json(basket);
   } catch (error) {
     next(error);
+  }
+};
+
+export const getCategory = async (req, res, next) => {
+  try {
+    const categories = await Category.find({});
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ message: "Помилка сервера" });
   }
 };
