@@ -25,7 +25,6 @@ export const getCurrentUser = async (req, res, next) => {
 
 export const updateUser = async (req, res, next) => {
   try {
-    console.log("Received data:", req.body);
     const { name, serName, phone, email, area, city, office } = req.body;
     const updateData = {
       ...(name && { name }),
@@ -59,7 +58,6 @@ export const updateUser = async (req, res, next) => {
       city: updatedUser.city,
       office: updatedUser.office,
     };
-    console.log("updatedUser", updatedUser);
     res.status(200).json({
       message: "User updated successfully",
       user: updatedUser,

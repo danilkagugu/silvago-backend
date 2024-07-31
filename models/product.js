@@ -5,12 +5,8 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  description: {
+  image: {
     type: String,
-    required: true,
-  },
-  price: {
-    type: Number,
     required: true,
   },
   category: {
@@ -21,10 +17,23 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  image: {
+  brand: {
+    type: String,
+  },
+  country: {
+    type: String,
+    // enum: ["korea", "ukraine", "polsha", "usa", "italy"],
+    required: true,
+  },
+  description: {
     type: String,
     required: true,
   },
+  price: {
+    type: Number,
+    required: true,
+  },
+
   quantity: {
     type: Number,
     default: 0,
