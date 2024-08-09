@@ -1,4 +1,5 @@
 import Basket from "../models/basket.js";
+import BasketItem from "../models/basketItem.js";
 import Category from "../models/category.js";
 import FavoriteProduct from "../models/favoritesProducts.js";
 import Order from "../models/orderSchema.js";
@@ -32,6 +33,7 @@ export const getProducts = async (req, res, next) => {
     next(error);
   }
 };
+
 export const getFavoriteProducts = async (req, res, next) => {
   try {
     const products = await FavoriteProduct.find({ owner: req.user.id });
@@ -101,18 +103,20 @@ export const getProductById = async (req, res, next) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
     const productById = {
       id: product._id,
       name: product.name,
+      article: product.article,
       category: product.category,
       description: product.description,
-      price: product.price,
+      volumes: product.volumes,
+      characteristics: product.characteristics,
       image: product.image,
       quantity: product.quantity,
       brand: product.brand,
       country: product.country,
     };
-
     res.status(200).json(productById).end();
   } catch (error) {
     next(error);
@@ -121,7 +125,7 @@ export const getProductById = async (req, res, next) => {
 
 export const addProductToBasket = async (req, res, next) => {
   try {
-    const { quantity } = req.body;
+    const { quantity, volume } = req.body;
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -131,12 +135,14 @@ export const addProductToBasket = async (req, res, next) => {
       basket = new Basket({ owner: req.user.id, products: [] });
     }
     const indexProduct = basket.products.findIndex(
-      (item) => item.product.toString() === product._id.toString()
+      (item) =>
+        item.product.toString() === product._id.toString() &&
+        item.volume === volume // додано перевірку на об'єм
     );
     if (indexProduct >= 0) {
       basket.products[indexProduct].quantity += quantity;
     } else {
-      basket.products.push({ product: product._id, quantity });
+      basket.products.push({ product: product._id, quantity, volume }); // додано об'єм
     }
     await basket.save();
     res.status(200).json(basket);
@@ -144,6 +150,32 @@ export const addProductToBasket = async (req, res, next) => {
     next(error);
   }
 };
+
+// export const addProductToBasket = async (req, res, next) => {
+//   try {
+//     const { quantity } = req.body;
+//     const product = await Product.findById(req.params.id);
+//     if (!product) {
+//       return res.status(404).json({ message: "Product not found" });
+//     }
+//     let basket = await Basket.findOne({ owner: req.user.id });
+//     if (!basket) {
+//       basket = new Basket({ owner: req.user.id, products: [] });
+//     }
+//     const indexProduct = basket.products.findIndex(
+//       (item) => item.product.toString() === product._id.toString()
+//     );
+//     if (indexProduct >= 0) {
+//       basket.products[indexProduct].quantity += quantity;
+//     } else {
+//       basket.products.push({ product: product._id, quantity });
+//     }
+//     await basket.save();
+//     res.status(200).json(basket);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 export const getBasket = async (req, res, next) => {
   try {
@@ -170,6 +202,8 @@ export const sendOrder = async (req, res, next) => {
     const basketFromDB = await Basket.findOne({ owner: req.user.id }).populate(
       "products.product"
     );
+    // console.log("basketFromDB.products", basketFromDB.products);
+    console.log("basketFromDB", basketFromDB.products);
     if (!basketFromDB || basketFromDB.products.length === 0) {
       return res.status(400).json({ message: "Basket is empty" });
     }
@@ -177,18 +211,24 @@ export const sendOrder = async (req, res, next) => {
     const totalQuantity = basketFromDB.products.reduce((total, productItem) => {
       return total + productItem.quantity;
     }, 0);
-
     // Створюємо нове замовлення з продуктами з кошика
     const newOrder = new Order({
       owner: req.user.id,
       user,
-      basket: basketFromDB.products.map((productItem) => ({
-        product: productItem.product._id,
-        productName: productItem.product.name,
-        productPrice: productItem.product.price,
-        image: productItem.product.image,
-        quantity: productItem.quantity,
-      })),
+      basket: basketFromDB.products.map((productItem) => {
+        const selectedVolume =
+          productItem.product.volumes.find(
+            (v) => v.volume === productItem.volume
+          ) || {};
+        return {
+          product: productItem.product._id,
+          productName: productItem.product.name,
+          price: selectedVolume.price,
+          image: productItem.product.image,
+          quantity: productItem.quantity,
+          volume: productItem.volume,
+        };
+      }),
       totalAmount: basketFromDB.products.reduce((total, productItem) => {
         if (productItem.product && productItem.product.price) {
           return total + productItem.quantity * productItem.product.price;
@@ -197,7 +237,7 @@ export const sendOrder = async (req, res, next) => {
       }, 0),
       allQuantity: totalQuantity,
     });
-
+    console.log("newOrder", newOrder);
     const order = await newOrder.save();
     // Очищуємо кошик після створення замовлення
     basketFromDB.products = [];
@@ -221,6 +261,7 @@ export const sendOrder = async (req, res, next) => {
 export const getOrder = async (req, res, next) => {
   try {
     const order = await Order.find({ owner: req.user.id });
+    // console.log("order", order.basket);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -235,6 +276,7 @@ export const updateProductQuantity = async (req, res, next) => {
     const { quantity } = req.body;
     const productId = req.params.id;
     const userId = req.user.id;
+    const volume = req.body.volume;
 
     let basket = await Basket.findOne({ owner: userId });
     if (!basket) {
@@ -242,7 +284,7 @@ export const updateProductQuantity = async (req, res, next) => {
     }
 
     const productIndex = basket.products.findIndex(
-      (item) => item.product.toString() === productId
+      (item) => item.product.toString() === productId && item.volume === volume
     );
 
     if (productIndex === -1) {
@@ -264,5 +306,93 @@ export const getCategory = async (req, res, next) => {
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: "Помилка сервера" });
+  }
+};
+
+// export const addProductToBasket = async (req, res, next) => {
+//   try {
+//     const { volume, price, quantity } = req.body;
+//     const { id: productId } = req.params;
+//     console.log("productId: ", productId);
+//     const product = await Product.findById(productId);
+//     if (!product) {
+//       return res.status(404).json({ message: "Product not found" });
+//     }
+//     let basket = await Basket.findOne({ owner: req.user.id });
+//     if (!basket) {
+//       basket = new Basket({ owner: req.user.id, items: [] });
+//       await basket.save();
+//     }
+//     let basketItem = await BasketItem.findOne({
+//       product: productId,
+//       volume,
+//       price,
+//     });
+//     if (basketItem) {
+//       // Оновити кількість, якщо товар вже є у корзині
+//       basketItem.quantity += quantity;
+//       await basketItem.save();
+//     } else {
+//       // Створити новий товар у корзині
+//       basketItem = new BasketItem({
+//         product: productId,
+//         volume,
+//         price,
+//         quantity,
+//       });
+//       await basketItem.save();
+//     }
+//     if (!basket.items.includes(basketItem._id)) {
+//       basket.items.push(basketItem._id);
+//       await basket.save();
+//     }
+
+//     res.status(200).json(basket);
+//     //
+//     // const { quantity, volume } = req.body;
+//     // const product = await Product.findById(req.params.id);
+//     // if (!product) {
+//     //   return res.status(404).json({ message: "Product not found" });
+//     // }
+//     // let basket = await Basket.findOne({ owner: req.user.id });
+//     // if (!basket) {
+//     //   basket = new Basket({ owner: req.user.id, products: [] });
+//     // }
+//     // const indexProduct = basket.products.findIndex(
+//     //   (item) =>
+//     //     item.product.toString() === product._id.toString() &&
+//     //     item.volume === volume
+//     // );
+//     // if (indexProduct >= 0) {
+//     //   basket.products[indexProduct].quantity += quantity;
+//     // } else {
+//     //   basket.products.push({ product: product._id, quantity, volume });
+//     // }
+//     // await basket.save();
+//     // res.status(200).json(basket);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+export const searchProducts = async (req, res, next) => {
+  try {
+    const { query } = req.query;
+
+    // Перевірка, чи є запит
+    if (!query) {
+      return res.status(400).json({ message: "Запит не може бути порожнім" });
+    }
+
+    // Пошук продуктів за допомогою регулярного виразу
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } }, // Пошук за назвою продукту
+      ],
+    });
+
+    res.json(products);
+  } catch (error) {
+    next(error);
   }
 };

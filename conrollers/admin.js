@@ -15,15 +15,42 @@ export const createProductAdmin = async (req, res, next) => {
       folder: "image",
     });
     await fs.unlink(req.file.path);
+    console.log("req.body.volumes:", req.body.volumes);
+    let volumes = [];
+    let characteristics = [];
+    if (Array.isArray(req.body.volumes)) {
+      volumes = req.body.volumes;
+    } else if (typeof req.body.volumes === "string") {
+      try {
+        volumes = JSON.parse(req.body.volumes);
+      } catch (err) {
+        return res.status(400).json({ error: "Invalid volumes format." });
+      }
+    }
+    if (Array.isArray(req.body.characteristics)) {
+      characteristics = req.body.characteristics;
+    } else if (typeof req.body.characteristics === "string") {
+      try {
+        characteristics = JSON.parse(req.body.characteristics);
+      } catch (err) {
+        return res
+          .status(400)
+          .json({ error: "Invalid characteristics format." });
+      }
+    }
+    console.log("Parsed volumes:", volumes);
+    // console.log("Sending volumes:", JSON.stringify(params.data.volumes));
     const newRecord = await Product.create({
       name: req.body.name,
+      article: req.body.article,
       image: result.secure_url,
       category: req.body.category,
       subcategory: req.body.subcategory,
       brand: req.body.brand,
       country: req.body.country,
       description: req.body.description,
-      price: req.body.price,
+      characteristics: characteristics,
+      volumes: volumes, // Додаємо об'єм до запису
       quantity: req.body.quantity,
       discount: req.body.discount,
     });
