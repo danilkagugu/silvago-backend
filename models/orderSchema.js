@@ -28,7 +28,7 @@ const orderSchema = new Schema(
         productName: {
           type: String,
         },
-        productPrice: {
+        price: {
           type: Number,
         },
         image: {
@@ -37,6 +37,10 @@ const orderSchema = new Schema(
         quantity: {
           type: Number,
           default: 1,
+        },
+        volume: {
+          type: Number,
+          required: true,
         },
       },
     ],

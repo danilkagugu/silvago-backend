@@ -10,6 +10,7 @@ import {
   getOrder,
   getProductById,
   getProducts,
+  searchProducts,
   sendOrder,
   updateProductQuantity,
 } from "../conrollers/product.js";
@@ -29,5 +30,6 @@ productRouter.patch("/basket/:id", authMiddlewares, updateProductQuantity);
 productRouter.post("/basket/order", authMiddlewares, sendOrder);
 productRouter.get("/order", authMiddlewares, getOrder);
 productRouter.get("/category", getCategory);
+productRouter.get("/search", searchProducts);
 
 export default productRouter;
