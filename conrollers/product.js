@@ -237,7 +237,27 @@ export const sendOrder = async (req, res, next) => {
       }, 0),
       allQuantity: totalQuantity,
     });
-    console.log("newOrder", newOrder);
+    // console.log("newOrder", newOrder);
+
+    for (const productItem of basketFromDB.products) {
+      const product = await Product.findById(productItem.product._id);
+
+      if (product) {
+        const selectedVolume = product.volumes.find(
+          (v) => v.volume === productItem.volume
+        );
+
+        if (selectedVolume) {
+          selectedVolume.quantity -= productItem.quantity;
+          if (selectedVolume.quantity < 0) {
+            selectedVolume.quantity = 0; // Зберігаємо мінімальне значення як 0
+          }
+        }
+
+        await product.save();
+      }
+    }
+
     const order = await newOrder.save();
     // Очищуємо кошик після створення замовлення
     basketFromDB.products = [];
