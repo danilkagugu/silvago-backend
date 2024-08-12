@@ -74,15 +74,17 @@ const productSchema = new Schema({
         type: Number,
         required: true,
       },
+      quantity: {
+        type: Number,
+        required: true,
+      },
     },
   ],
-
-  quantity: {
+  discount: {
     type: Number,
     default: 0,
-    required: true,
   },
-  discount: {
+  salesCount: {
     type: Number,
     default: 0,
   },

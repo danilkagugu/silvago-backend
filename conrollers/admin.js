@@ -15,7 +15,7 @@ export const createProductAdmin = async (req, res, next) => {
       folder: "image",
     });
     await fs.unlink(req.file.path);
-    console.log("req.body.volumes:", req.body.volumes);
+    // console.log("req.body.volumes:", req.body.volumes);
     let volumes = [];
     let characteristics = [];
     if (Array.isArray(req.body.volumes)) {
@@ -51,7 +51,7 @@ export const createProductAdmin = async (req, res, next) => {
       description: req.body.description,
       characteristics: characteristics,
       volumes: volumes, // Додаємо об'єм до запису
-      quantity: req.body.quantity,
+      // quantity: req.body.quantity,
       discount: req.body.discount,
     });
 
