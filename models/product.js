@@ -80,13 +80,11 @@ const productSchema = new Schema({
       },
     },
   ],
-
-  // quantity: {
-  //   type: Number,
-  //   default: 0,
-  //   required: true,
-  // },
   discount: {
+    type: Number,
+    default: 0,
+  },
+  salesCount: {
     type: Number,
     default: 0,
   },

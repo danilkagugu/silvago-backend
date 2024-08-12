@@ -144,38 +144,27 @@ export const addProductToBasket = async (req, res, next) => {
     } else {
       basket.products.push({ product: product._id, quantity, volume }); // додано об'єм
     }
+
     await basket.save();
+    product.salesCount += quantity;
+    await product.save();
     res.status(200).json(basket);
   } catch (error) {
     next(error);
   }
 };
 
-// export const addProductToBasket = async (req, res, next) => {
-//   try {
-//     const { quantity } = req.body;
-//     const product = await Product.findById(req.params.id);
-//     if (!product) {
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-//     let basket = await Basket.findOne({ owner: req.user.id });
-//     if (!basket) {
-//       basket = new Basket({ owner: req.user.id, products: [] });
-//     }
-//     const indexProduct = basket.products.findIndex(
-//       (item) => item.product.toString() === product._id.toString()
-//     );
-//     if (indexProduct >= 0) {
-//       basket.products[indexProduct].quantity += quantity;
-//     } else {
-//       basket.products.push({ product: product._id, quantity });
-//     }
-//     await basket.save();
-//     res.status(200).json(basket);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+export const getTopSellingProducts = async (req, res, next) => {
+  try {
+    const topSellingProducts = await Product.find()
+      .sort({ salesCount: -1 }) // Сортуємо за кількістю продажів (спаданням)
+      .limit(10); // Обмежуємо до 10 товарів
+
+    res.json(topSellingProducts);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getBasket = async (req, res, next) => {
   try {

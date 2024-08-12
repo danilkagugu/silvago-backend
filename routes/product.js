@@ -10,6 +10,7 @@ import {
   getOrder,
   getProductById,
   getProducts,
+  getTopSellingProducts,
   searchProducts,
   sendOrder,
   updateProductQuantity,
@@ -31,5 +32,6 @@ productRouter.post("/basket/order", authMiddlewares, sendOrder);
 productRouter.get("/order", authMiddlewares, getOrder);
 productRouter.get("/category", getCategory);
 productRouter.get("/search", searchProducts);
+productRouter.get("/top-selling-products", getTopSellingProducts);
 
 export default productRouter;
