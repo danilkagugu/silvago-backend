@@ -46,6 +46,8 @@ export const getFavoriteProducts = async (req, res, next) => {
 
 export const addFavoriteProduct = async (req, res, next) => {
   try {
+    const { volume } = req.body;
+    console.log("volume: ", volume);
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -60,6 +62,7 @@ export const addFavoriteProduct = async (req, res, next) => {
               productName: product.name,
               productPrice: product.price,
               image: product.image,
+              volumes: product.volumes,
             },
           ],
         },
