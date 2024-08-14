@@ -6,6 +6,7 @@ import {
   deleteFavoriteProduct,
   getBasket,
   getCategory,
+  getDiscountProducts,
   getFavoriteProducts,
   getOrder,
   getProductById,
@@ -33,5 +34,6 @@ productRouter.get("/order", authMiddlewares, getOrder);
 productRouter.get("/category", getCategory);
 productRouter.get("/search", searchProducts);
 productRouter.get("/top-selling-products", getTopSellingProducts);
+productRouter.get("/discount-products", getDiscountProducts);
 
 export default productRouter;

@@ -154,18 +154,6 @@ export const addProductToBasket = async (req, res, next) => {
   }
 };
 
-export const getTopSellingProducts = async (req, res, next) => {
-  try {
-    const topSellingProducts = await Product.find()
-      .sort({ salesCount: -1 }) // Сортуємо за кількістю продажів (спаданням)
-      .limit(10); // Обмежуємо до 10 товарів
-
-    res.json(topSellingProducts);
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const getBasket = async (req, res, next) => {
   try {
     const basket = await Basket.findOne({ owner: req.user.id });
@@ -401,6 +389,44 @@ export const searchProducts = async (req, res, next) => {
     });
 
     res.json(products);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getTopSellingProducts = async (req, res, next) => {
+  try {
+    const topSellingProducts = await Product.find()
+      .sort({ salesCount: -1 }) // Сортуємо за кількістю продажів (спаданням)
+      .limit(10); // Обмежуємо до 10 товарів
+
+    res.json(topSellingProducts);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getDiscountProducts = async (req, res, next) => {
+  try {
+    const discountProducts = await Product.aggregate([
+      { $unwind: "$volumes" }, // Розгортаємо масив volumes
+      { $match: { "volumes.discount": { $gt: 0 } } }, // Фільтруємо продукти з ненульовою знижкою
+      { $sort: { "volumes.discount": -1 } }, // Сортуємо за знижкою (спаданням)
+      {
+        $group: {
+          _id: "$_id",
+          product: { $first: "$$ROOT" },
+          volumes: { $push: "$volumes" }, // Зберігаємо всі об'єми
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: { $mergeObjects: ["$product", { volumes: "$volumes" }] },
+        },
+      }, // Заміщуємо кореневий документ
+    ]);
+
+    res.json(discountProducts);
   } catch (error) {
     next(error);
   }
