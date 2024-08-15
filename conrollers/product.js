@@ -2,6 +2,7 @@ import Basket from "../models/basket.js";
 import BasketItem from "../models/basketItem.js";
 import Category from "../models/category.js";
 import FavoriteProduct from "../models/favoritesProducts.js";
+import OrderCounter from "../models/orderCounterSchema.js";
 import Order from "../models/orderSchema.js";
 import Product from "../models/product.js";
 import { createProductSchema } from "../schemas/productSchema.js";
@@ -182,8 +183,7 @@ export const sendOrder = async (req, res, next) => {
     const basketFromDB = await Basket.findOne({ owner: req.user.id }).populate(
       "products.product"
     );
-    // console.log("basketFromDB.products", basketFromDB.products);
-    console.log("basketFromDB", basketFromDB.products);
+
     if (!basketFromDB || basketFromDB.products.length === 0) {
       return res.status(400).json({ message: "Basket is empty" });
     }
@@ -191,33 +191,68 @@ export const sendOrder = async (req, res, next) => {
     const totalQuantity = basketFromDB.products.reduce((total, productItem) => {
       return total + productItem.quantity;
     }, 0);
+
+    let orderCounter = await OrderCounter.findOne();
+    if (!orderCounter) {
+      orderCounter = new OrderCounter();
+      orderCounter.count += 1;
+    }
+    orderCounter.count += 1;
+    // Збільшуємо лічильник на 1
+    await orderCounter.save();
+
     // Створюємо нове замовлення з продуктами з кошика
     const newOrder = new Order({
+      orderNumber: orderCounter.count,
       owner: req.user.id,
       user,
       basket: basketFromDB.products.map((productItem) => {
+        // console.log("productItem: ", productItem);
         const selectedVolume =
           productItem.product.volumes.find(
             (v) => v.volume === productItem.volume
           ) || {};
+        // console.log("selectedVolume", selectedVolume);
         return {
           product: productItem.product._id,
           productName: productItem.product.name,
-          price: selectedVolume.price,
+          price: Math.ceil(
+            selectedVolume.discount > 0
+              ? selectedVolume.price -
+                  (selectedVolume.price / 100) * selectedVolume.discount
+              : selectedVolume.price
+          ),
           image: productItem.product.image,
           quantity: productItem.quantity,
           volume: productItem.volume,
+          discount: selectedVolume.discount || 0,
         };
       }),
       totalAmount: basketFromDB.products.reduce((total, productItem) => {
-        if (productItem.product && productItem.product.price) {
-          return total + productItem.quantity * productItem.product.price;
+        const selectedVolume = productItem.product.volumes.find(
+          (v) => v.volume === productItem.volume
+        );
+        // console.log("selectedVolume", selectedVolume);
+        if (selectedVolume) {
+          if (selectedVolume.discount) {
+            return (
+              total +
+              Math.ceil(
+                selectedVolume.discount > 0
+                  ? selectedVolume.price -
+                      (selectedVolume.price / 100) * selectedVolume.discount
+                  : selectedVolume.price
+              ) *
+                productItem.quantity
+            );
+          } else {
+            return total + selectedVolume.price * productItem.quantity;
+          }
         }
         return total;
       }, 0),
       allQuantity: totalQuantity,
     });
-    // console.log("newOrder", newOrder);
 
     for (const productItem of basketFromDB.products) {
       const product = await Product.findById(productItem.product._id);
@@ -261,7 +296,7 @@ export const sendOrder = async (req, res, next) => {
 export const getOrder = async (req, res, next) => {
   try {
     const order = await Order.find({ owner: req.user.id });
-    // console.log("order", order.basket);
+    // console.log("order", order);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
