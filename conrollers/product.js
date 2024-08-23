@@ -1,3 +1,4 @@
+import axios from "axios";
 import Basket from "../models/basket.js";
 import BasketItem from "../models/basketItem.js";
 import Category from "../models/category.js";
@@ -5,6 +6,7 @@ import FavoriteProduct from "../models/favoritesProducts.js";
 import OrderCounter from "../models/orderCounterSchema.js";
 import Order from "../models/orderSchema.js";
 import Product from "../models/product.js";
+import uniproProducts from "../models/uniproProduct.js";
 import { createProductSchema } from "../schemas/productSchema.js";
 
 export const createProduct = async (req, res, next) => {
@@ -38,6 +40,8 @@ export const getProducts = async (req, res, next) => {
 export const getFavoriteProducts = async (req, res, next) => {
   try {
     const products = await FavoriteProduct.find({ owner: req.user.id });
+    console.log("тільки що оновились подукти😉😉");
+    // console.log("products: ", products);
 
     res.json(products);
   } catch (error) {
@@ -47,8 +51,7 @@ export const getFavoriteProducts = async (req, res, next) => {
 
 export const addFavoriteProduct = async (req, res, next) => {
   try {
-    const { volume } = req.body;
-    console.log("volume: ", volume);
+    const { id } = req.params;
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -59,11 +62,12 @@ export const addFavoriteProduct = async (req, res, next) => {
         $addToSet: {
           products: [
             {
-              product: product._id,
+              product: id,
               productName: product.name,
               productPrice: product.price,
               image: product.image,
               volumes: product.volumes,
+              _id: id,
             },
           ],
         },
@@ -75,6 +79,10 @@ export const addFavoriteProduct = async (req, res, next) => {
     );
 
     res.status(200).json(addProduct);
+    // res.status(200).json({
+    //   message: "Success",
+    //   updatedFavorites: await FavoriteProduct.find({ owner: req.user.id }),
+    // });
   } catch (error) {
     next(error);
   }
@@ -96,10 +104,69 @@ export const deleteFavoriteProduct = async (req, res, next) => {
       return res.status(404).json({ message: "Favorite product not found" });
     }
     res.json(product);
+    // res.status(200).json({
+    //   message: "Success",
+    //   updatedFavorites: await FavoriteProduct.find({ owner: req.user.id }),
+    // });
   } catch (error) {
     next(error);
   }
 };
+// export const addFavoriteProduct = async (req, res, next) => {
+//   try {
+//     const { volume } = req.body;
+//     console.log("volume: ", volume);
+//     const product = await Product.findById(req.params.id);
+//     if (!product) {
+//       return res.status(404).json({ message: "Product not found" });
+//     }
+//     const addProduct = await FavoriteProduct.findOneAndUpdate(
+//       { owner: req.user.id },
+//       {
+//         $addToSet: {
+//           products: [
+//             {
+//               product: product._id,
+//               productName: product.name,
+//               productPrice: product.price,
+//               image: product.image,
+//               volumes: product.volumes,
+//             },
+//           ],
+//         },
+//       },
+//       {
+//         new: true,
+//         upsert: true,
+//       }
+//     );
+
+//     res.status(200).json(addProduct);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+// export const deleteFavoriteProduct = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     const product = await FavoriteProduct.findOneAndUpdate(
+//       { owner: req.user.id },
+//       {
+//         $pull: {
+//           products: { product: id },
+//         },
+//       },
+//       { new: true }
+//     );
+//     if (!product) {
+//       return res.status(404).json({ message: "Favorite product not found" });
+//     }
+//     res.json(product);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 export const getProductById = async (req, res, next) => {
   try {
@@ -129,7 +196,8 @@ export const getProductById = async (req, res, next) => {
 
 export const addProductToBasket = async (req, res, next) => {
   try {
-    const { quantity, volume } = req.body;
+    const { quantity, volume, price } = req.body;
+    console.log("price: ", price);
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -146,13 +214,34 @@ export const addProductToBasket = async (req, res, next) => {
     if (indexProduct >= 0) {
       basket.products[indexProduct].quantity += quantity;
     } else {
-      basket.products.push({ product: product._id, quantity, volume }); // додано об'єм
+      basket.products.push({ product: product._id, quantity, volume, price }); // додано об'єм
     }
 
     await basket.save();
     product.salesCount += quantity;
     await product.save();
     res.status(200).json(basket);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteProductFromBasket = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const product = await Basket.findOneAndUpdate(
+      { owner: req.user.id },
+      {
+        $pull: {
+          products: { product: id },
+        },
+      },
+      { new: true }
+    );
+    if (!product) {
+      return res.status(404).json({ message: "Favorite product not found" });
+    }
+    res.json(product);
   } catch (error) {
     next(error);
   }
@@ -467,5 +556,71 @@ export const getDiscountProducts = async (req, res, next) => {
     res.json(discountProducts);
   } catch (error) {
     next(error);
+  }
+};
+
+// Тест Unipro
+const UNIPRO_API_URL = "https://api.unipro.ua/";
+
+export const getUnipro = async (req, res) => {
+  try {
+    const { goods } = req.body; // Отримання даних товарів з тіла запиту
+
+    // Перебір масиву товарів та збереження кожного з них у базі даних
+    const savedProducts = await Promise.all(
+      goods.map(async (productData) => {
+        // Перевірка, чи товар вже існує в базі даних
+        const existingProduct = await uniproProducts.findOne({
+          barcode: productData.barcode,
+        });
+
+        if (existingProduct) {
+          // Якщо товар існує, оновлюємо його дані
+          existingProduct.set(productData);
+          return await existingProduct.save();
+        } else {
+          // Якщо товар не існує, створюємо новий
+          const product = new uniproProducts(productData);
+          return await product.save();
+        }
+      })
+    );
+
+    // Відправка успішної відповіді
+    res.status(201).json({
+      message: "Товари успішно додані або оновлені",
+      data: savedProducts,
+    });
+  } catch (error) {
+    console.error("Помилка при додаванні товарів:", error);
+    res.status(500).json({
+      message: "Помилка при додаванні товарів",
+      error: error.message,
+    });
+  }
+};
+
+export const sendUnipro = async (req, res) => {
+  try {
+    // Отримання даних з Unipro (приклад даних)
+    const uniproProducts = req.body.goods;
+
+    // Відправка даних до інтернет-магазину через API
+    const response = await axios.post(
+      "http://localhost:3030/products",
+      uniproProducts
+    );
+
+    // Відповідь після успішного надсилання
+    res.status(200).json({
+      message: "Товари успішно надіслані до інтернет-магазину",
+      data: response.data,
+    });
+  } catch (error) {
+    console.error("Помилка під час надсилання товарів:", error);
+    res.status(500).json({
+      message: "Помилка під час надсилання товарів",
+      error: error.message,
+    });
   }
 };
