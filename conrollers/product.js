@@ -196,6 +196,8 @@ export const getProductById = async (req, res, next) => {
 
 export const addProductToBasket = async (req, res, next) => {
   try {
+    console.log("req.body;", req.body);
+    console.log("req.params;", req.params);
     const { quantity, volume, price } = req.body;
     console.log("price: ", price);
     const product = await Product.findById(req.params.id);
@@ -228,20 +230,17 @@ export const addProductToBasket = async (req, res, next) => {
 
 export const deleteProductFromBasket = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const product = await Basket.findOneAndUpdate(
-      { owner: req.user.id },
-      {
-        $pull: {
-          products: { product: id },
-        },
-      },
-      { new: true }
+    const { productId, volume } = req.body;
+    console.log("req.body: ", req.body);
+
+    const basket = await Basket.findOne({ owner: req.user.id });
+    basket.products = basket.products.filter(
+      (item) =>
+        !(item.product.toString() === productId && item.volume === volume)
     );
-    if (!product) {
-      return res.status(404).json({ message: "Favorite product not found" });
-    }
-    res.json(product);
+
+    await basket.save();
+    res.json(basket);
   } catch (error) {
     next(error);
   }

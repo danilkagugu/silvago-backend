@@ -32,7 +32,7 @@ productRouter.get("/basket", authMiddlewares, getBasket);
 productRouter.post("/favorite/:id", authMiddlewares, addFavoriteProduct);
 productRouter.post("/:id/basket", authMiddlewares, addProductToBasket);
 productRouter.delete(
-  "/basket/delete/:id",
+  "/basket/delete/",
   authMiddlewares,
   deleteProductFromBasket
 );
