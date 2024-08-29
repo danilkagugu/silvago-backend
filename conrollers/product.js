@@ -396,10 +396,10 @@ export const getOrder = async (req, res, next) => {
 
 export const updateProductQuantity = async (req, res, next) => {
   try {
-    const { quantity } = req.body;
+    const { quantity, volume } = req.body;
+
     const productId = req.params.id;
     const userId = req.user.id;
-    const volume = req.body.volume;
 
     let basket = await Basket.findOne({ owner: userId });
     if (!basket) {
