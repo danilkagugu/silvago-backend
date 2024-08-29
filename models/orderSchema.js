@@ -2,7 +2,7 @@ import { model, Schema } from "mongoose";
 
 const orderSchema = new Schema(
   {
-    // orderNumber: { type: Number, unique: true },
+    orderNumber: { type: Number, unique: true },
     owner: {
       type: Schema.Types.ObjectId,
       ref: "user",
@@ -41,6 +41,10 @@ const orderSchema = new Schema(
         volume: {
           type: Number,
           required: true,
+        },
+        discount: {
+          type: Number,
+          default: 0,
         },
       },
     ],

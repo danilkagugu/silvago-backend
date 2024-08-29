@@ -31,22 +31,3 @@ const basketSchema = new Schema({
 const Basket = model("basket", basketSchema);
 
 export default Basket;
-
-// import { model, Schema } from "mongoose";
-
-// const basketSchema = new Schema({
-//   owner: {
-//     type: Schema.Types.ObjectId,
-//     ref: "user",
-//   },
-//   items: [
-//     {
-//       type: Schema.Types.ObjectId,
-//       ref: "basketItem",
-//     },
-//   ],
-// });
-
-// const Basket = model("basket", basketSchema);
-
-// export default Basket;
