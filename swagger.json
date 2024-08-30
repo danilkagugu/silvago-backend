@@ -169,47 +169,6 @@
       }
     },
     "/product": {
-      "post": {
-        "summary": "Додати новий продукт",
-        "tags": ["Product"],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "example": "Product Name"
-                  },
-                  "price": {
-                    "type": "number",
-                    "example": 99.99
-                  },
-                  "category": {
-                    "type": "string",
-                    "example": "Category ID"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Продукт успішно створено"
-          },
-          "401": {
-            "description": "Не авторизовано"
-          }
-        }
-      },
       "get": {
         "summary": "Отримати список продуктів",
         "tags": ["Product"],
@@ -460,13 +419,20 @@
         }
       }
     },
-    "/product/category": {
+    "api/product/category": {
       "get": {
         "summary": "Отримати список категорій",
         "tags": ["Product"],
         "responses": {
           "200": {
             "description": "Список категорій"
+          },
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWaterRecordRequest"
+              }
+            }
           }
         }
       }
