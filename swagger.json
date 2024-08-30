@@ -1,0 +1,539 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Documentation",
+    "version": "1.0.0",
+    "description": "API для роботи з автентифікацією та продуктами"
+  },
+  "servers": [
+    {
+      "description": "SwaggerHub API Auto Mocking",
+      "url": "https://virtserver.swaggerhub.com/danilyanishevski2001/SilvagoShop/1.0.0"
+    },
+    {
+      "url": "http://localhost:3030",
+      "description": "Local server"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Логін користувача",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успішний логін"
+          },
+          "401": {
+            "description": "Невірний email або пароль"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Реєстрація нового користувача",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  },
+                  "username": {
+                    "type": "string",
+                    "example": "username123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Успішна реєстрація"
+          },
+          "400": {
+            "description": "Помилка в даних реєстрації"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Вихід користувача з системи",
+        "tags": ["Authentication"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успішний вихід"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/auth/current": {
+      "get": {
+        "summary": "Отримати поточного користувача",
+        "tags": ["Authentication"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Повертає інформацію про поточного користувача"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/auth/update": {
+      "patch": {
+        "summary": "Оновлення інформації користувача",
+        "tags": ["Authentication"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  },
+                  "username": {
+                    "type": "string",
+                    "example": "newUsername"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успішне оновлення інформації"
+          },
+          "400": {
+            "description": "Помилка в даних оновлення"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/product": {
+      "post": {
+        "summary": "Додати новий продукт",
+        "tags": ["Product"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Product Name"
+                  },
+                  "price": {
+                    "type": "number",
+                    "example": 99.99
+                  },
+                  "category": {
+                    "type": "string",
+                    "example": "Category ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Продукт успішно створено"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      },
+      "get": {
+        "summary": "Отримати список продуктів",
+        "tags": ["Product"],
+        "responses": {
+          "200": {
+            "description": "Список продуктів"
+          }
+        }
+      }
+    },
+    "/product/favorite": {
+      "get": {
+        "summary": "Отримати список улюблених продуктів",
+        "tags": ["Product"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список улюблених продуктів"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/product/favorite/{id}": {
+      "post": {
+        "summary": "Додати продукт в улюблені",
+        "tags": ["Product"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID продукту"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Продукт додано в улюблені"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Видалити продукт з улюблених",
+        "tags": ["Product"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID продукту"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Продукт видалено з улюблених"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/product/basket": {
+      "get": {
+        "summary": "Отримати кошик користувача",
+        "tags": ["Product"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Повертає кошик користувача"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/product/{id}/basket": {
+      "post": {
+        "summary": "Додати продукт у кошик",
+        "tags": ["Product"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID продукту"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Продукт додано у кошик"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/product/basket/delete": {
+      "delete": {
+        "summary": "Видалити продукт з кошика",
+        "tags": ["Product"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "productId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID продукту"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Продукт видалено з кошика"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/product/basket/{id}": {
+      "patch": {
+        "summary": "Оновити кількість продукту в кошику",
+        "tags": ["Product"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID продукту"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "quantity": {
+                    "type": "integer",
+                    "example": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Кількість продукту оновлено"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/product/basket/order": {
+      "post": {
+        "summary": "Оформити замовлення",
+        "tags": ["Product"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Замовлення успішно оформлено"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/product/order": {
+      "get": {
+        "summary": "Отримати замовлення користувача",
+        "tags": ["Product"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список замовлень користувача"
+          },
+          "401": {
+            "description": "Не авторизовано"
+          }
+        }
+      }
+    },
+    "/product/category": {
+      "get": {
+        "summary": "Отримати список категорій",
+        "tags": ["Product"],
+        "responses": {
+          "200": {
+            "description": "Список категорій"
+          }
+        }
+      }
+    },
+    "/product/search": {
+      "get": {
+        "summary": "Пошук продуктів",
+        "tags": ["Product"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Ключові слова для пошуку"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Результати пошуку"
+          }
+        }
+      }
+    },
+    "/product/top-selling-products": {
+      "get": {
+        "summary": "Отримати найпопулярніші продукти",
+        "tags": ["Product"],
+        "responses": {
+          "200": {
+            "description": "Список найпопулярніших продуктів"
+          }
+        }
+      }
+    },
+    "/product/discount-products": {
+      "get": {
+        "summary": "Отримати продукти зі знижками",
+        "tags": ["Product"],
+        "responses": {
+          "200": {
+            "description": "Список продуктів зі знижками"
+          }
+        }
+      }
+    },
+    "/product/send-products": {
+      "post": {
+        "summary": "Відправити продукти (Unipro)",
+        "tags": ["Product"],
+        "responses": {
+          "200": {
+            "description": "Продукти успішно відправлені"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
