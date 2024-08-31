@@ -189,10 +189,727 @@
           }
         ]
       }
+    },
+    "/product/": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get all products",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/inline_response_200_2"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product/favorite": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get favorite products",
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/inline_response_200_2"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/product/favorite/{id}": {
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Add product to favorite",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the product to add to favorites",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product added to favorites",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_3"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User unauthorized"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Delete a favorite product by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the product to delete from favorites",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_4"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)"
+          },
+          "401": {
+            "description": "User unauthorized"
+          },
+          "404": {
+            "description": "Favorite product not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/product/product/{id}": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get product by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the product to retrieve",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product details by ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_5"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      }
+    },
+    "/product/basket": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get basket",
+        "responses": {
+          "200": {
+            "description": "Basket retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_6"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Basket not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/product/basket/{id}": {
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Add product to basket",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "description": "ID of the product to add to the basket"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/basket_id_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Product added to the basket successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_7"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)"
+          },
+          "401": {
+            "description": "User unauthorized"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Update product quantity in the basket",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "description": "ID of the product to update the quantity for"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/basket_id_body_1"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Product quantity updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_7"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request body)"
+          },
+          "401": {
+            "description": "User unauthorized"
+          },
+          "404": {
+            "description": "Basket not found or product not found in basket"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/product/basket/delete": {
+      "delete": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Delete product from basket",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "ID of the product to be deleted from the basket",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "volume",
+            "in": "query",
+            "description": "Volume of the product to be deleted from the basket",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product successfully deleted from the basket",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_7"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request parameters)"
+          },
+          "401": {
+            "description": "User unauthorized"
+          },
+          "404": {
+            "description": "Basket not found or product not found in basket"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/product/basket/order": {
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Send order",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/basket_order_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Order created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_201_2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid request parameters)"
+          },
+          "401": {
+            "description": "User unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/product/order": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get orders for the authenticated user",
+        "responses": {
+          "200": {
+            "description": "Orders retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/inline_response_200_8"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "User unauthorized"
+          },
+          "404": {
+            "description": "Order not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/product/category": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get categories",
+        "responses": {
+          "200": {
+            "description": "Categories retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/inline_response_200_9"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/product/search": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Search for products",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "string",
+              "description": "Search query string to find products by name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Products retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/inline_response_200_10"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (query parameter missing or invalid)"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/product/top-selling-products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get top selling products",
+        "responses": {
+          "200": {
+            "description": "Top selling products retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/inline_response_200_11"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/product/discount-products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get discount products",
+        "responses": {
+          "200": {
+            "description": "Discount products retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/inline_response_200_12"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "inline_response_200_11": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "ID of the product"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the product"
+          },
+          "price": {
+            "type": "number",
+            "description": "Price of the product"
+          },
+          "image": {
+            "type": "string",
+            "description": "Image URL of the product"
+          },
+          "salesCount": {
+            "type": "number",
+            "description": "Number of sales for the product"
+          }
+        }
+      },
+      "inline_response_200_10": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "ID of the product"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the product"
+          },
+          "price": {
+            "type": "number",
+            "description": "Price of the product"
+          },
+          "image": {
+            "type": "string",
+            "description": "Image URL of the product"
+          }
+        }
+      },
+      "inline_response_200_12": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "ID of the product"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the product"
+          },
+          "price": {
+            "type": "number",
+            "description": "Price of the product"
+          },
+          "image": {
+            "type": "string",
+            "description": "Image URL of the product"
+          },
+          "volumes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/productdiscountproducts_volumes"
+            }
+          },
+          "totalDiscount": {
+            "type": "number",
+            "description": "Total discount applied to the product (if any)"
+          }
+        }
+      },
+      "productdiscountproducts_volumes": {
+        "type": "object",
+        "properties": {
+          "volume": {
+            "type": "number",
+            "description": "Volume of the product"
+          },
+          "price": {
+            "type": "number",
+            "description": "Price of the product for the specific volume"
+          },
+          "discount": {
+            "type": "number",
+            "description": "Discount for the specific volume"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity available for the specific volume"
+          }
+        }
+      },
+      "inline_response_200_7_products": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "string",
+            "description": "ID of the product"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity of the product"
+          },
+          "volume": {
+            "type": "number",
+            "description": "Volume of the product"
+          },
+          "price": {
+            "type": "number",
+            "description": "Price of the product"
+          }
+        }
+      },
+      "inline_response_201_2_order_user": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email of the user"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address of the user"
+          }
+        }
+      },
       "inline_response_201_user": {
         "type": "object",
         "properties": {
@@ -204,18 +921,27 @@
           }
         }
       },
-      "auth_register_body": {
-        "required": [
-          "email",
-          "password"
-        ],
+      "productorder_user": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string"
+          "name": {
+            "type": "string",
+            "description": "Name of the user"
           },
-          "password": {
-            "type": "string"
+          "serName": {
+            "type": "string",
+            "description": "Surname of the user"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email of the user"
+          },
+          "address": {
+            "$ref": "#/components/schemas/productorder_user_address"
           }
         }
       },
@@ -224,47 +950,6 @@
         "properties": {
           "user": {
             "$ref": "#/components/schemas/inline_response_201_user"
-          }
-        }
-      },
-      "inline_response_200_1": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          },
-          "user": {
-            "$ref": "#/components/schemas/inline_response_200"
-          }
-        },
-        "example": {
-          "message": "User updated successfully",
-          "user": {
-            "id": "610c4f8e2a3e2c1d88a4412c",
-            "name": "John",
-            "serName": "Doe",
-            "phone": "+123456789",
-            "email": "johndoe@example.com",
-            "area": "Kyivska",
-            "city": "Kyiv",
-            "office": "Nova Poshta #23"
-          }
-        }
-      },
-      "inline_response_201_1_user": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "serName": {
-            "type": "string"
-          },
-          "phone": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
           }
         }
       },
@@ -280,20 +965,6 @@
           },
           "password": {
             "type": "string"
-          }
-        }
-      },
-      "inline_response_201_1": {
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string"
-          },
-          "refreshToken": {
-            "type": "string"
-          },
-          "user": {
-            "$ref": "#/components/schemas/inline_response_201_1_user"
           }
         }
       },
@@ -326,6 +997,505 @@
           }
         }
       },
+      "productorder_basket": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "string",
+            "description": "ID of the product"
+          },
+          "productName": {
+            "type": "string",
+            "description": "Name of the product"
+          },
+          "price": {
+            "type": "number",
+            "description": "Price of the product"
+          },
+          "image": {
+            "type": "string",
+            "description": "Image URL of the product"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity of the product"
+          },
+          "volume": {
+            "type": "number",
+            "description": "Volume of the product"
+          },
+          "discount": {
+            "type": "number",
+            "description": "Discount on the product"
+          }
+        }
+      },
+      "productorder_user_address": {
+        "type": "object",
+        "properties": {
+          "area": {
+            "type": "string",
+            "description": "Area of the address"
+          },
+          "city": {
+            "type": "string",
+            "description": "City of the address"
+          },
+          "office": {
+            "type": "string",
+            "description": "Office of the address"
+          }
+        }
+      },
+      "product_characteristics": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "string"
+          },
+          "productClass": {
+            "type": "string"
+          },
+          "appointment": {
+            "type": "string"
+          },
+          "skinType": {
+            "type": "string"
+          },
+          "series": {
+            "type": "string"
+          },
+          "productType": {
+            "type": "string"
+          },
+          "age": {
+            "type": "string"
+          }
+        }
+      },
+      "basket_order_body": {
+        "required": [
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/productbasketorder_user"
+          }
+        }
+      },
+      "inline_response_200_9": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the category"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug for the category"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/productcategory_items"
+            }
+          }
+        }
+      },
+      "inline_response_200_5": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "article": {
+            "type": "number"
+          },
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "volumes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/product_volumes"
+            }
+          },
+          "characteristics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/product_characteristics"
+            }
+          },
+          "image": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          }
+        }
+      },
+      "inline_response_200_6": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "ID of the user who owns the basket"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/inline_response_200_6_products"
+            }
+          }
+        }
+      },
+      "inline_response_200_7": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "description": "ID of the user who owns the basket"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/inline_response_200_7_products"
+            }
+          }
+        }
+      },
+      "inline_response_200_8": {
+        "type": "object",
+        "properties": {
+          "orderNumber": {
+            "type": "number",
+            "description": "Order number"
+          },
+          "owner": {
+            "type": "string",
+            "description": "ID of the user who placed the order"
+          },
+          "user": {
+            "$ref": "#/components/schemas/productorder_user"
+          },
+          "basket": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/productorder_basket"
+            }
+          },
+          "totalAmount": {
+            "type": "number",
+            "description": "Total amount of the order"
+          },
+          "allQuantity": {
+            "type": "number",
+            "description": "Total quantity of products in the order"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the order"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Date and time when the order was created",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "Date and time when the order was last updated",
+            "format": "date-time"
+          }
+        }
+      },
+      "productbasketorder_user": {
+        "required": [
+          "address",
+          "email",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email of the user"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address of the user"
+          }
+        }
+      },
+      "inline_response_201_1_user": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "serName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "basket_id_body_1": {
+        "required": [
+          "quantity",
+          "volume"
+        ],
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "description": "New quantity of the product"
+          },
+          "volume": {
+            "type": "number",
+            "description": "Volume of the product"
+          }
+        }
+      },
+      "product_volumes": {
+        "type": "object",
+        "properties": {
+          "volume": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "discount": {
+            "type": "number"
+          }
+        }
+      },
+      "productcategory_items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the item in the category"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug for the item in the category"
+          }
+        }
+      },
+      "auth_register_body": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "basket_id_body": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "description": "Quantity of the product to add"
+          },
+          "volume": {
+            "type": "number",
+            "description": "Volume of the product"
+          },
+          "price": {
+            "type": "number",
+            "description": "Price of the product"
+          }
+        }
+      },
+      "inline_response_200_1": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/inline_response_200"
+          }
+        },
+        "example": {
+          "message": "User updated successfully",
+          "user": {
+            "id": "610c4f8e2a3e2c1d88a4412c",
+            "name": "John",
+            "serName": "Doe",
+            "phone": "+123456789",
+            "email": "johndoe@example.com",
+            "area": "Kyivska",
+            "city": "Kyiv",
+            "office": "Nova Poshta #23"
+          }
+        }
+      },
+      "inline_response_201_1": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/inline_response_201_1_user"
+          }
+        }
+      },
+      "inline_response_200_2": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "article": {
+            "type": "number"
+          },
+          "image": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "subcategory": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "characteristics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/product_characteristics"
+            }
+          },
+          "volumes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/product_volumes"
+            }
+          },
+          "salesCount": {
+            "type": "number"
+          },
+          "isAvailable": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "inline_response_200_3": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "product": {
+            "$ref": "#/components/schemas/inline_response_200_3_product"
+          }
+        }
+      },
+      "inline_response_201_2": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Success message"
+          },
+          "order": {
+            "$ref": "#/components/schemas/inline_response_201_2_order"
+          }
+        }
+      },
+      "inline_response_200_4": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Favorite product deleted successfully"
+          },
+          "product": {
+            "$ref": "#/components/schemas/inline_response_200_2"
+          }
+        }
+      },
+      "inline_response_200_3_product": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "string"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "productPrice": {
+            "type": "number"
+          },
+          "image": {
+            "type": "string"
+          },
+          "volumes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/product_volumes"
+            }
+          },
+          "_id": {
+            "type": "string"
+          }
+        }
+      },
       "auth_update_body": {
         "type": "object",
         "properties": {
@@ -349,6 +1519,57 @@
           },
           "office": {
             "type": "string"
+          }
+        }
+      },
+      "inline_response_200_6_products": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "string",
+            "description": "ID of the product"
+          },
+          "price": {
+            "type": "number",
+            "description": "Price of the product"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity of the product"
+          },
+          "volume": {
+            "type": "number",
+            "description": "Volume of the product"
+          }
+        }
+      },
+      "inline_response_201_2_order": {
+        "type": "object",
+        "properties": {
+          "orderNumber": {
+            "type": "number",
+            "description": "Order number"
+          },
+          "owner": {
+            "type": "string",
+            "description": "ID of the user who placed the order"
+          },
+          "user": {
+            "$ref": "#/components/schemas/inline_response_201_2_order_user"
+          },
+          "basket": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/productorder_basket"
+            }
+          },
+          "totalAmount": {
+            "type": "number",
+            "description": "Total amount of the order"
+          },
+          "allQuantity": {
+            "type": "number",
+            "description": "Total quantity of products in the order"
           }
         }
       }

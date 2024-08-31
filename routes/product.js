@@ -26,11 +26,11 @@ const productRouter = express.Router();
 productRouter.post("/", authMiddlewares, createProduct);
 productRouter.get("/", getProducts);
 productRouter.get("/favorite", authMiddlewares, getFavoriteProducts);
+productRouter.post("/favorite/:id", authMiddlewares, addFavoriteProduct);
 productRouter.delete("/favorite/:id", authMiddlewares, deleteFavoriteProduct);
 productRouter.get("/product/:id", getProductById);
 productRouter.get("/basket", authMiddlewares, getBasket);
-productRouter.post("/favorite/:id", authMiddlewares, addFavoriteProduct);
-productRouter.post("/:id/basket", authMiddlewares, addProductToBasket);
+productRouter.post("/basket/:id", authMiddlewares, addProductToBasket);
 productRouter.delete(
   "/basket/delete/",
   authMiddlewares,
@@ -44,6 +44,6 @@ productRouter.get("/search", searchProducts);
 productRouter.get("/top-selling-products", getTopSellingProducts);
 productRouter.get("/discount-products", getDiscountProducts);
 // productRouter.post("/update-products", getUnipro);
-productRouter.post("/send-products", getUnipro);
+// productRouter.post("/send-products", getUnipro);
 
 export default productRouter;
