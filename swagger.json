@@ -11,7 +11,7 @@
   },
   "servers": [
     {
-      "url": "https://the-silvago-cosmetics.onrender.com/api"
+      "url": "https://silvago-backend.onrender.com/api"
     },
     {
       "url": "http://localhost:3030/api"
@@ -30,9 +30,7 @@
   "paths": {
     "/auth/register": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "User registration",
         "requestBody": {
           "content": {
@@ -66,9 +64,7 @@
     },
     "/auth/login": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "User login",
         "requestBody": {
           "content": {
@@ -102,9 +98,7 @@
     },
     "/auth/logout": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "User logout",
         "responses": {
           "204": {
@@ -123,9 +117,7 @@
     },
     "/auth/current": {
       "get": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Current User",
         "responses": {
           "200": {
@@ -151,9 +143,7 @@
     },
     "/auth/update": {
       "patch": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Update user info",
         "requestBody": {
           "content": {
@@ -192,9 +182,7 @@
     },
     "/product/": {
       "get": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Get all products",
         "responses": {
           "200": {
@@ -215,9 +203,7 @@
     },
     "/product/favorite": {
       "get": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Get favorite products",
         "responses": {
           "200": {
@@ -246,9 +232,7 @@
     },
     "/product/favorite/{id}": {
       "post": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Add product to favorite",
         "parameters": [
           {
@@ -288,9 +272,7 @@
         ]
       },
       "delete": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Delete a favorite product by ID",
         "parameters": [
           {
@@ -335,9 +317,7 @@
     },
     "/product/product/{id}": {
       "get": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Get product by ID",
         "parameters": [
           {
@@ -371,9 +351,7 @@
     },
     "/product/basket": {
       "get": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Get basket",
         "responses": {
           "200": {
@@ -399,9 +377,7 @@
     },
     "/product/basket/{id}": {
       "post": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Add product to basket",
         "parameters": [
           {
@@ -454,9 +430,7 @@
         ]
       },
       "patch": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Update product quantity in the basket",
         "parameters": [
           {
@@ -511,9 +485,7 @@
     },
     "/product/basket/delete": {
       "delete": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Delete product from basket",
         "parameters": [
           {
@@ -569,9 +541,7 @@
     },
     "/product/basket/order": {
       "post": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Send order",
         "requestBody": {
           "content": {
@@ -613,9 +583,7 @@
     },
     "/product/order": {
       "get": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Get orders for the authenticated user",
         "responses": {
           "200": {
@@ -653,9 +621,7 @@
     },
     "/product/category": {
       "get": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Get categories",
         "responses": {
           "200": {
@@ -679,9 +645,7 @@
     },
     "/product/search": {
       "get": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Search for products",
         "parameters": [
           {
@@ -721,9 +685,7 @@
     },
     "/product/top-selling-products": {
       "get": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Get top selling products",
         "responses": {
           "200": {
@@ -747,9 +709,7 @@
     },
     "/product/discount-products": {
       "get": {
-        "tags": [
-          "Products"
-        ],
+        "tags": ["Products"],
         "summary": "Get discount products",
         "responses": {
           "200": {
@@ -954,10 +914,7 @@
         }
       },
       "auth_login_body": {
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "type": "object",
         "properties": {
           "email": {
@@ -1074,9 +1031,7 @@
         }
       },
       "basket_order_body": {
-        "required": [
-          "user"
-        ],
+        "required": ["user"],
         "type": "object",
         "properties": {
           "user": {
@@ -1222,11 +1177,7 @@
         }
       },
       "productbasketorder_user": {
-        "required": [
-          "address",
-          "email",
-          "name"
-        ],
+        "required": ["address", "email", "name"],
         "type": "object",
         "properties": {
           "name": {
@@ -1261,10 +1212,7 @@
         }
       },
       "basket_id_body_1": {
-        "required": [
-          "quantity",
-          "volume"
-        ],
+        "required": ["quantity", "volume"],
         "type": "object",
         "properties": {
           "quantity": {
@@ -1308,10 +1256,7 @@
         }
       },
       "auth_register_body": {
-        "required": [
-          "email",
-          "password"
-        ],
+        "required": ["email", "password"],
         "type": "object",
         "properties": {
           "email": {
