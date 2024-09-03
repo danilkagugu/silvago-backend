@@ -1,0 +1,122 @@
+export const sendOrder = async (req, res, next) => {
+  try {
+    const { user } = req.body;
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid input data" });
+    }
+
+    // Перевіряємо чи є кошик у користувача
+    const basketFromDB = await Basket.findOne({ owner: req.user.id }).populate(
+      "products.product"
+    );
+
+    if (!basketFromDB || basketFromDB.products.length === 0) {
+      return res.status(400).json({ message: "Basket is empty" });
+    }
+
+    const totalQuantity = basketFromDB.products.reduce((total, productItem) => {
+      return total + productItem.quantity;
+    }, 0);
+
+    let orderCounter = await OrderCounter.findOne();
+    if (!orderCounter) {
+      orderCounter = new OrderCounter();
+      orderCounter.count += 1;
+    }
+    orderCounter.count += 1;
+    // Збільшуємо лічильник на 1
+    await orderCounter.save();
+
+    // Створюємо нове замовлення з продуктами з кошика
+    const newOrder = new Order({
+      orderNumber: orderCounter.count,
+      owner: req.user.id,
+      user,
+      basket: basketFromDB.products.map((productItem) => {
+        // console.log("productItem: ", productItem);
+        const selectedVolume =
+          productItem.product.volumes.find(
+            (v) => v.volume === productItem.volume
+          ) || {};
+        // console.log("selectedVolume", selectedVolume);
+        return {
+          product: productItem.product._id,
+          productName: productItem.product.name,
+          price: Math.ceil(
+            selectedVolume.discount > 0
+              ? selectedVolume.price -
+                  (selectedVolume.price / 100) * selectedVolume.discount
+              : selectedVolume.price
+          ),
+          image: productItem.product.image,
+          quantity: productItem.quantity,
+          volume: productItem.volume,
+          discount: selectedVolume.discount || 0,
+        };
+      }),
+      totalAmount: basketFromDB.products.reduce((total, productItem) => {
+        const selectedVolume = productItem.product.volumes.find(
+          (v) => v.volume === productItem.volume
+        );
+        // console.log("selectedVolume", selectedVolume);
+        if (selectedVolume) {
+          if (selectedVolume.discount) {
+            return (
+              total +
+              Math.ceil(
+                selectedVolume.discount > 0
+                  ? selectedVolume.price -
+                      (selectedVolume.price / 100) * selectedVolume.discount
+                  : selectedVolume.price
+              ) *
+                productItem.quantity
+            );
+          } else {
+            return total + selectedVolume.price * productItem.quantity;
+          }
+        }
+        return total;
+      }, 0),
+      allQuantity: totalQuantity,
+    });
+
+    for (const productItem of basketFromDB.products) {
+      const product = await Product.findById(productItem.product._id);
+
+      if (product) {
+        const selectedVolume = product.volumes.find(
+          (v) => v.volume === productItem.volume
+        );
+
+        if (selectedVolume) {
+          selectedVolume.quantity -= productItem.quantity;
+          if (selectedVolume.quantity < 0) {
+            selectedVolume.quantity = 0; // Зберігаємо мінімальне значення як 0
+          }
+        }
+
+        await product.save();
+      }
+    }
+
+    const order = await newOrder.save();
+    console.log("order: ", order);
+    // Очищуємо кошик після створення замовлення
+    basketFromDB.products = [];
+    await basketFromDB.save();
+
+    res.status(201).json({ message: "Order created successfully", order });
+  } catch (error) {
+    console.error("Error creating order:", error);
+
+    if (!res.headersSent) {
+      res.status(500).json({
+        message: "Internal Server Error",
+        error: error.message,
+      });
+    }
+
+    next(error);
+  }
+};

@@ -9,7 +9,7 @@ const app = express();
 
 const corsOptions = {
   origin: "https://silvago.vercel.app", // Додайте тут ваш домен
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 

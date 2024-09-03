@@ -112,61 +112,6 @@ export const deleteFavoriteProduct = async (req, res, next) => {
     next(error);
   }
 };
-// export const addFavoriteProduct = async (req, res, next) => {
-//   try {
-//     const { volume } = req.body;
-//     console.log("volume: ", volume);
-//     const product = await Product.findById(req.params.id);
-//     if (!product) {
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-//     const addProduct = await FavoriteProduct.findOneAndUpdate(
-//       { owner: req.user.id },
-//       {
-//         $addToSet: {
-//           products: [
-//             {
-//               product: product._id,
-//               productName: product.name,
-//               productPrice: product.price,
-//               image: product.image,
-//               volumes: product.volumes,
-//             },
-//           ],
-//         },
-//       },
-//       {
-//         new: true,
-//         upsert: true,
-//       }
-//     );
-
-//     res.status(200).json(addProduct);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
-// export const deleteFavoriteProduct = async (req, res, next) => {
-//   try {
-//     const { id } = req.params;
-//     const product = await FavoriteProduct.findOneAndUpdate(
-//       { owner: req.user.id },
-//       {
-//         $pull: {
-//           products: { product: id },
-//         },
-//       },
-//       { new: true }
-//     );
-//     if (!product) {
-//       return res.status(404).json({ message: "Favorite product not found" });
-//     }
-//     res.json(product);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 export const getProductById = async (req, res, next) => {
   try {
@@ -196,10 +141,12 @@ export const getProductById = async (req, res, next) => {
 
 export const addProductToBasket = async (req, res, next) => {
   try {
-    console.log("req.body;", req.body);
-    console.log("req.params;", req.params);
+    // console.log("req.body;", req.body);
+    // console.log("req.params;", req.params);
     const { quantity, volume, price } = req.body;
-    console.log("price: ", price);
+
+    console.log("volume: ", volume);
+    console.log("priceqq: ", price);
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -248,6 +195,7 @@ export const deleteProductFromBasket = async (req, res, next) => {
 
 export const getBasket = async (req, res, next) => {
   try {
+    console.log("req.user.id", req.user.id);
     const basket = await Basket.findOne({ owner: req.user.id });
 
     if (!basket) {
@@ -262,6 +210,7 @@ export const getBasket = async (req, res, next) => {
 export const sendOrder = async (req, res, next) => {
   try {
     const { user } = req.body;
+    console.log("user: ", user);
 
     if (!user) {
       return res.status(400).json({ message: "Invalid input data" });
@@ -288,19 +237,17 @@ export const sendOrder = async (req, res, next) => {
     orderCounter.count += 1;
     // Збільшуємо лічильник на 1
     await orderCounter.save();
-
     // Створюємо нове замовлення з продуктами з кошика
     const newOrder = new Order({
       orderNumber: orderCounter.count,
       owner: req.user.id,
       user,
       basket: basketFromDB.products.map((productItem) => {
-        // console.log("productItem: ", productItem);
+        console.log("productItem: ", productItem);
         const selectedVolume =
           productItem.product.volumes.find(
             (v) => v.volume === productItem.volume
           ) || {};
-        // console.log("selectedVolume", selectedVolume);
         return {
           product: productItem.product._id,
           productName: productItem.product.name,
@@ -320,7 +267,7 @@ export const sendOrder = async (req, res, next) => {
         const selectedVolume = productItem.product.volumes.find(
           (v) => v.volume === productItem.volume
         );
-        // console.log("selectedVolume", selectedVolume);
+        console.log("selectedVolume", selectedVolume);
         if (selectedVolume) {
           if (selectedVolume.discount) {
             return (
@@ -341,8 +288,9 @@ export const sendOrder = async (req, res, next) => {
       }, 0),
       allQuantity: totalQuantity,
     });
-
+    console.log("newOrder", newOrder);
     for (const productItem of basketFromDB.products) {
+      console.log("productItem.product._id", productItem.product._id);
       const product = await Product.findById(productItem.product._id);
 
       if (product) {
@@ -362,9 +310,11 @@ export const sendOrder = async (req, res, next) => {
     }
 
     const order = await newOrder.save();
+    console.log("order: ", order);
     // Очищуємо кошик після створення замовлення
     basketFromDB.products = [];
     await basketFromDB.save();
+    console.log("newOrder", JSON.stringify(newOrder, null, 2));
 
     res.status(201).json({ message: "Order created successfully", order });
   } catch (error) {
@@ -431,72 +381,6 @@ export const getCategory = async (req, res, next) => {
     res.status(500).json({ message: "Помилка сервера" });
   }
 };
-
-// export const addProductToBasket = async (req, res, next) => {
-//   try {
-//     const { volume, price, quantity } = req.body;
-//     const { id: productId } = req.params;
-//     console.log("productId: ", productId);
-//     const product = await Product.findById(productId);
-//     if (!product) {
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-//     let basket = await Basket.findOne({ owner: req.user.id });
-//     if (!basket) {
-//       basket = new Basket({ owner: req.user.id, items: [] });
-//       await basket.save();
-//     }
-//     let basketItem = await BasketItem.findOne({
-//       product: productId,
-//       volume,
-//       price,
-//     });
-//     if (basketItem) {
-//       // Оновити кількість, якщо товар вже є у корзині
-//       basketItem.quantity += quantity;
-//       await basketItem.save();
-//     } else {
-//       // Створити новий товар у корзині
-//       basketItem = new BasketItem({
-//         product: productId,
-//         volume,
-//         price,
-//         quantity,
-//       });
-//       await basketItem.save();
-//     }
-//     if (!basket.items.includes(basketItem._id)) {
-//       basket.items.push(basketItem._id);
-//       await basket.save();
-//     }
-
-//     res.status(200).json(basket);
-//     //
-//     // const { quantity, volume } = req.body;
-//     // const product = await Product.findById(req.params.id);
-//     // if (!product) {
-//     //   return res.status(404).json({ message: "Product not found" });
-//     // }
-//     // let basket = await Basket.findOne({ owner: req.user.id });
-//     // if (!basket) {
-//     //   basket = new Basket({ owner: req.user.id, products: [] });
-//     // }
-//     // const indexProduct = basket.products.findIndex(
-//     //   (item) =>
-//     //     item.product.toString() === product._id.toString() &&
-//     //     item.volume === volume
-//     // );
-//     // if (indexProduct >= 0) {
-//     //   basket.products[indexProduct].quantity += quantity;
-//     // } else {
-//     //   basket.products.push({ product: product._id, quantity, volume });
-//     // }
-//     // await basket.save();
-//     // res.status(200).json(basket);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 export const searchProducts = async (req, res, next) => {
   try {

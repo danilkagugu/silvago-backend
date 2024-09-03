@@ -32,7 +32,7 @@ export const login = async (req, res, next) => {
       id: user._id,
     },
     SECRET_KEY,
-    { expiresIn: "1h" }
+    { expiresIn: "10h" }
   );
 
   const refreshToken = jwt.sign(

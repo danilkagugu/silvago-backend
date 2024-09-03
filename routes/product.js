@@ -13,10 +13,8 @@ import {
   getProductById,
   getProducts,
   getTopSellingProducts,
-  getUnipro,
   searchProducts,
   sendOrder,
-  sendUnipro,
   updateProductQuantity,
 } from "../conrollers/product.js";
 import authMiddlewares from "../middlewares/authMiddlewares.js";
@@ -30,7 +28,8 @@ productRouter.post("/favorite/:id", authMiddlewares, addFavoriteProduct);
 productRouter.delete("/favorite/:id", authMiddlewares, deleteFavoriteProduct);
 productRouter.get("/product/:id", getProductById);
 productRouter.get("/basket", authMiddlewares, getBasket);
-productRouter.post("/basket/:id", authMiddlewares, addProductToBasket);
+productRouter.post("/:id/basket", authMiddlewares, addProductToBasket);
+// productRouter.post("/basket/:id", authMiddlewares, addProductToBasket);
 productRouter.delete(
   "/basket/delete/",
   authMiddlewares,
