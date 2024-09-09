@@ -195,7 +195,7 @@ export const deleteProductFromBasket = async (req, res, next) => {
 
 export const getBasket = async (req, res, next) => {
   try {
-    console.log("req.user.id", req.user.id);
+    // console.log("req.user.id✌❤❤", req.user.id);
     const basket = await Basket.findOne({ owner: req.user.id });
 
     if (!basket) {
@@ -334,6 +334,22 @@ export const sendOrder = async (req, res, next) => {
 export const getOrder = async (req, res, next) => {
   try {
     const order = await Order.find({ owner: req.user.id });
+    // console.log("order", order);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    res.json(order);
+  } catch (error) {
+    next(error);
+  }
+};
+export const getOrderById = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.find({
+      orderNumber: orderId,
+      owner: req.user.id,
+    });
     // console.log("order", order);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
