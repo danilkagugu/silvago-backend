@@ -24,6 +24,11 @@ const basketSchema = new Schema({
         type: Number, // додано поле для об'єму
         required: true,
       },
+      slug: {
+        type: String,
+        ref: "product.volumes.slug",
+        unique: true,
+      },
     },
   ],
 });

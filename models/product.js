@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import slugify from "slugify";
 
 const productSchema = new Schema({
   name: {
@@ -82,6 +83,10 @@ const productSchema = new Schema({
         type: Number,
         default: 0,
       },
+      slug: {
+        type: String,
+        unique: true,
+      },
     },
   ],
 
@@ -89,6 +94,16 @@ const productSchema = new Schema({
     type: Number,
     default: 0,
   },
+});
+
+productSchema.pre("save", function (next) {
+  this.volumes.forEach((volume) => {
+    if (!volume.slug) {
+      const slugBase = slugify(this.name, { lower: true, strict: true });
+      volume.slug = `${slugBase}-${volume.volume}ml`;
+    }
+  });
+  next();
 });
 
 const Product = model("product", productSchema);

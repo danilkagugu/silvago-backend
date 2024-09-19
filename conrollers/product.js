@@ -114,26 +114,23 @@ export const deleteFavoriteProduct = async (req, res, next) => {
 };
 
 export const getProductById = async (req, res, next) => {
+  const { slug } = req.params;
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findOne({ "volumes.slug": slug });
+
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).send("Product not found");
     }
 
-    const productById = {
-      id: product._id,
-      name: product.name,
-      article: product.article,
-      category: product.category,
-      description: product.description,
-      volumes: product.volumes,
-      characteristics: product.characteristics,
-      image: product.image,
-      quantity: product.quantity,
-      brand: product.brand,
-      country: product.country,
-    };
-    res.status(200).json(productById).end();
+    // Знаходимо конкретний варіант об'єму за slug
+    const volume = product.volumes.find((v) => v.slug === slug);
+
+    if (!volume) {
+      return res.status(404).send("Volume not found");
+    }
+    console.log("🎶🎶😎");
+
+    res.status(200).json({ product, volume });
   } catch (error) {
     next(error);
   }
@@ -141,13 +138,11 @@ export const getProductById = async (req, res, next) => {
 
 export const addProductToBasket = async (req, res, next) => {
   try {
-    // console.log("req.body;", req.body);
-    // console.log("req.params;", req.params);
-    const { quantity, volume, price } = req.body;
+    const { quantity, volume, price, slug } = req.body;
+    console.log("slug: ", req.params);
 
-    console.log("volume: ", volume);
-    console.log("priceqq: ", price);
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findOne({ "volumes.slug": req.params.slug });
+    console.log("product: ", product);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -163,7 +158,13 @@ export const addProductToBasket = async (req, res, next) => {
     if (indexProduct >= 0) {
       basket.products[indexProduct].quantity += quantity;
     } else {
-      basket.products.push({ product: product._id, quantity, volume, price }); // додано об'єм
+      basket.products.push({
+        product: product._id,
+        quantity,
+        volume,
+        price,
+        slug,
+      }); // додано об'єм
     }
 
     await basket.save();
@@ -178,7 +179,9 @@ export const addProductToBasket = async (req, res, next) => {
 export const deleteProductFromBasket = async (req, res, next) => {
   try {
     const { productId, volume } = req.body;
-    console.log("req.body: ", req.body);
+    console.log("volume: ", volume);
+    console.log("productId: ", productId);
+    // console.log("req.body: ", req.body);
 
     const basket = await Basket.findOne({ owner: req.user.id });
     basket.products = basket.products.filter(
@@ -187,6 +190,7 @@ export const deleteProductFromBasket = async (req, res, next) => {
     );
 
     await basket.save();
+    console.log("basket: ", basket);
     res.json(basket);
   } catch (error) {
     next(error);
@@ -195,7 +199,6 @@ export const deleteProductFromBasket = async (req, res, next) => {
 
 export const getBasket = async (req, res, next) => {
   try {
-    console.log("req.user.id", req.user.id);
     const basket = await Basket.findOne({ owner: req.user.id });
 
     if (!basket) {
@@ -210,7 +213,7 @@ export const getBasket = async (req, res, next) => {
 export const sendOrder = async (req, res, next) => {
   try {
     const { user } = req.body;
-    console.log("user: ", user);
+    // console.log("user: ", user);
 
     if (!user) {
       return res.status(400).json({ message: "Invalid input data" });
@@ -334,6 +337,22 @@ export const sendOrder = async (req, res, next) => {
 export const getOrder = async (req, res, next) => {
   try {
     const order = await Order.find({ owner: req.user.id });
+    // console.log("order", order);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    res.json(order);
+  } catch (error) {
+    next(error);
+  }
+};
+export const getOrderById = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.find({
+      orderNumber: orderId,
+      owner: req.user.id,
+    });
     // console.log("order", order);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });

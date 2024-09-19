@@ -10,6 +10,7 @@ import {
   getDiscountProducts,
   getFavoriteProducts,
   getOrder,
+  getOrderById,
   getProductById,
   getProducts,
   getTopSellingProducts,
@@ -26,10 +27,9 @@ productRouter.get("/", getProducts);
 productRouter.get("/favorite", authMiddlewares, getFavoriteProducts);
 productRouter.post("/favorite/:id", authMiddlewares, addFavoriteProduct);
 productRouter.delete("/favorite/:id", authMiddlewares, deleteFavoriteProduct);
-productRouter.get("/product/:id", getProductById);
+productRouter.get("/product/:slug", getProductById);
 productRouter.get("/basket", authMiddlewares, getBasket);
-productRouter.post("/:id/basket", authMiddlewares, addProductToBasket);
-// productRouter.post("/basket/:id", authMiddlewares, addProductToBasket);
+productRouter.post("/:slug/basket", authMiddlewares, addProductToBasket);
 productRouter.delete(
   "/basket/delete/",
   authMiddlewares,
@@ -38,11 +38,10 @@ productRouter.delete(
 productRouter.patch("/basket/:id", authMiddlewares, updateProductQuantity);
 productRouter.post("/basket/order", authMiddlewares, sendOrder);
 productRouter.get("/order", authMiddlewares, getOrder);
+productRouter.get("/order/:orderId", authMiddlewares, getOrderById);
 productRouter.get("/category", getCategory);
 productRouter.get("/search", searchProducts);
 productRouter.get("/top-selling-products", getTopSellingProducts);
 productRouter.get("/discount-products", getDiscountProducts);
-// productRouter.post("/update-products", getUnipro);
-// productRouter.post("/send-products", getUnipro);
 
 export default productRouter;
