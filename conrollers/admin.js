@@ -15,9 +15,12 @@ export const createProductAdmin = async (req, res, next) => {
       folder: "image",
     });
     await fs.unlink(req.file.path);
-    // console.log("req.body.volumes:", req.body.volumes);
+
     let volumes = [];
     let characteristics = [];
+    let filters = {};
+
+    // Парсинг volumes
     if (Array.isArray(req.body.volumes)) {
       volumes = req.body.volumes;
     } else if (typeof req.body.volumes === "string") {
@@ -27,6 +30,8 @@ export const createProductAdmin = async (req, res, next) => {
         return res.status(400).json({ error: "Invalid volumes format." });
       }
     }
+
+    // Парсинг characteristics
     if (Array.isArray(req.body.characteristics)) {
       characteristics = req.body.characteristics;
     } else if (typeof req.body.characteristics === "string") {
@@ -38,8 +43,19 @@ export const createProductAdmin = async (req, res, next) => {
           .json({ error: "Invalid characteristics format." });
       }
     }
-    console.log("Parsed volumes:", volumes);
-    // console.log("Sending volumes:", JSON.stringify(params.data.volumes));
+
+    // Парсинг filters
+    if (typeof req.body.filters === "string") {
+      try {
+        filters = JSON.parse(req.body.filters);
+      } catch (err) {
+        return res.status(400).json({ error: "Invalid filters format." });
+      }
+    } else {
+      filters = req.body.filters || {};
+    }
+
+    // Створення нового запису
     const newRecord = await Product.create({
       name: req.body.name,
       article: req.body.article,
@@ -51,7 +67,7 @@ export const createProductAdmin = async (req, res, next) => {
       description: req.body.description,
       characteristics: characteristics,
       volumes: volumes, // Додаємо об'єм до запису
-      // quantity: req.body.quantity,
+      filters: filters, // Додаємо фільтри до запису
       discount: req.body.discount,
     });
 

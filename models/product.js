@@ -65,6 +65,41 @@ const productSchema = new Schema({
       },
     },
   ],
+  filters: {
+    sunscreenType: {
+      type: String,
+      enum: ["Хімічні фільтри", "Фізичні фільтри", "Мікс фільтрів"],
+      default: null,
+    },
+    forSensitiveSkin: {
+      type: Boolean,
+      default: false,
+      label: "Для чутливої шкіри",
+    }, // Українська назва фільтра
+    acneTreatment: { type: Boolean, default: false, label: "Боротьба з акне" },
+    antiAge: { type: Boolean, default: false, label: "Anti-age" },
+    hydration: { type: Boolean, default: false, label: "Зволоження" },
+    nourishment: { type: Boolean, default: false, label: "Живлення" },
+    pigmentationTreatment: {
+      type: Boolean,
+      default: false,
+      label: "Освітлення пігментації",
+    },
+    seboRegulation: { type: Boolean, default: false, label: "Себорегуляція" },
+    couperoseTreatment: {
+      type: Boolean,
+      default: false,
+      label: "Лікування куперозу",
+    },
+    regeneration: { type: Boolean, default: false, label: "Відновлення" },
+    cleaning: { type: Boolean, default: false, label: "Очищення" },
+    soothing: { type: Boolean, default: false, label: "Заспокоєння" },
+    soothing: {
+      type: Boolean,
+      default: false,
+      label: "Захист від ультрафіолету",
+    },
+  },
   volumes: [
     {
       volume: {
@@ -87,6 +122,7 @@ const productSchema = new Schema({
         type: String,
         unique: true,
       },
+      barcode: { type: String, required: true },
     },
   ],
 
