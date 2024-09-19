@@ -27,9 +27,9 @@ productRouter.get("/", getProducts);
 productRouter.get("/favorite", authMiddlewares, getFavoriteProducts);
 productRouter.post("/favorite/:id", authMiddlewares, addFavoriteProduct);
 productRouter.delete("/favorite/:id", authMiddlewares, deleteFavoriteProduct);
-productRouter.get("/product/:id", getProductById);
+productRouter.get("/product/:slug", getProductById);
 productRouter.get("/basket", authMiddlewares, getBasket);
-productRouter.post("/:id/basket", authMiddlewares, addProductToBasket);
+productRouter.post("/:slug/basket", authMiddlewares, addProductToBasket);
 productRouter.delete(
   "/basket/delete/",
   authMiddlewares,
