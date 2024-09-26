@@ -3,6 +3,7 @@ import {
   createBrandAdmin,
   createCategoryAdmin,
   createProductAdmin,
+  createSkinNeed,
   delBrand,
   delManyProducts,
   delProduct,
@@ -10,6 +11,7 @@ import {
   getOneBrand,
   getOneProduct,
   getProducts,
+  getSkinNeed,
   getUsers,
   updateBrandsAdmin,
   updateProductsAdmin,
@@ -20,6 +22,8 @@ const adminRouter = express.Router();
 
 adminRouter.get("/users", getUsers);
 adminRouter.post("/add-product", uploadMiddleware, createProductAdmin);
+adminRouter.post("/create-skin", createSkinNeed);
+adminRouter.get("/skin", getSkinNeed);
 adminRouter.put("/products/:id", uploadMiddleware, updateProductsAdmin);
 adminRouter.get("/products", getProducts);
 adminRouter.get("/products/one/:id", getOneProduct);

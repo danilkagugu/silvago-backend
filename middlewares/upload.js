@@ -16,4 +16,4 @@ const storage = multer.diskStorage({
   },
 });
 
-export const uploadMiddleware = multer({ storage: storage }).single("image");
+export const uploadMiddleware = multer({ storage: storage }).array("image", 10); // Де 10 — це максимальна кількість файлів

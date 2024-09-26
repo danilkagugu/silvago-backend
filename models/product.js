@@ -10,10 +10,7 @@ const productSchema = new Schema({
     type: Number,
     required: true,
   },
-  image: {
-    type: String,
-    required: true,
-  },
+
   category: {
     type: String,
     required: true,
@@ -65,6 +62,14 @@ const productSchema = new Schema({
       },
     },
   ],
+  filters: [
+    {
+      _id: { type: Schema.Types.ObjectId, ref: "skinNeed" },
+      filterName: { type: String },
+      label: { type: String },
+    },
+  ],
+
   volumes: [
     {
       volume: {
@@ -87,6 +92,8 @@ const productSchema = new Schema({
         type: String,
         unique: true,
       },
+      barcode: { type: String, required: true },
+      image: [{ type: String }],
     },
   ],
 

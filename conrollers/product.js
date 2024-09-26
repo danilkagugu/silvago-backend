@@ -260,7 +260,7 @@ export const sendOrder = async (req, res, next) => {
                   (selectedVolume.price / 100) * selectedVolume.discount
               : selectedVolume.price
           ),
-          image: productItem.product.image,
+          image: selectedVolume.image[0],
           quantity: productItem.quantity,
           volume: productItem.volume,
           discount: selectedVolume.discount || 0,
