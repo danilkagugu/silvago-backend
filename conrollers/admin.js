@@ -3,29 +3,72 @@ import HttpError from "../helpers/HttpError.js";
 import Brand from "../models/brand.js";
 import Category from "../models/category.js";
 import Product from "../models/product.js";
+import SkinNeed from "../models/skinNeed.js";
 import User from "../models/user.js";
 import { createProductSchema } from "../schemas/productSchema.js";
 import * as fs from "node:fs/promises";
+
 export const createProductAdmin = async (req, res, next) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "Image file is required." });
+    // Перевірка наявності файлів
+    console.log("req.files", req.body.filters);
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: "Image files are required." });
     }
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "image",
-    });
-    await fs.unlink(req.file.path);
 
+    // Завантаження файлів на Cloudinary
+    const uploadedImages = await Promise.all(
+      req.files.map(async (file) => {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "image",
+        });
+
+        await fs.unlink(file.path); // Видаляємо тимчасовий файл
+        return result.secure_url; // Повертаємо посилання на Cloudinary
+      })
+    );
     let volumes = [];
     let characteristics = [];
-    let filters = {};
+    let filters = [];
 
     // Парсинг volumes
     if (Array.isArray(req.body.volumes)) {
-      volumes = req.body.volumes;
+      volumes = req.body.volumes.map((volume, index) => {
+        const images = []; // Масив для зображень цього volume
+
+        // Додаємо зображення, якщо вони існують
+        if (uploadedImages.length > index) {
+          images.push(uploadedImages[index]); // Додаємо лише відповідне зображення
+        }
+
+        // Якщо в об'єкті volume вже є масив зображень, додаємо їх
+        if (volume.image && Array.isArray(volume.image)) {
+          images.push(...volume.image);
+        }
+        // console.log("Uploaded Images: ", uploadedImages);
+
+        return {
+          ...volume,
+          image: images.length > 0 ? images : [],
+        };
+      });
+      // console.log("Volumes: ", volumes);
     } else if (typeof req.body.volumes === "string") {
       try {
-        volumes = JSON.parse(req.body.volumes);
+        volumes = JSON.parse(req.body.volumes).map((volume, index) => {
+          const images = [];
+          // Додаємо зображення, якщо вони існують
+          if (uploadedImages.length > index) {
+            images.push(uploadedImages[index]); // Додаємо лише відповідне зображення
+            // console.log("uploadedImages[index]: ", uploadedImages[0]);
+            // console.log("images.length", images.length);
+          }
+
+          return {
+            ...volume,
+            image: images.length > 0 ? images : [],
+          };
+        });
       } catch (err) {
         return res.status(400).json({ error: "Invalid volumes format." });
       }
@@ -45,32 +88,46 @@ export const createProductAdmin = async (req, res, next) => {
     }
 
     // Парсинг filters
+    // Парсинг filters
     if (typeof req.body.filters === "string") {
       try {
-        filters = JSON.parse(req.body.filters);
+        const parsedFilters = JSON.parse(req.body.filters);
+        console.log("parsedFilters: ", parsedFilters);
+        filters = parsedFilters.map((filter) => ({
+          _id: filter.filterType, // Зберігаємо ObjectId
+          filterName: filter.filterName, // Додаємо name
+          label: filter.label, // Додаємо label
+        }));
+        console.log("filters", filters);
       } catch (err) {
         return res.status(400).json({ error: "Invalid filters format." });
       }
+    } else if (Array.isArray(req.body.filters)) {
+      filters = req.body.filters.map((filter) => ({
+        _id: filter.filterType, // Зберігаємо ObjectId
+        filterName: filter.filterName, // Додаємо name
+        label: filter.label, // Додаємо label
+      }));
     } else {
-      filters = req.body.filters || {};
+      filters = [];
     }
 
+    console.log("req.body.filters", req.body.filters);
     // Створення нового запису
     const newRecord = await Product.create({
       name: req.body.name,
       article: req.body.article,
-      image: result.secure_url,
       category: req.body.category,
       subcategory: req.body.subcategory,
       brand: req.body.brand,
       country: req.body.country,
       description: req.body.description,
       characteristics: characteristics,
-      volumes: volumes, // Додаємо об'єм до запису
+      volumes: volumes,
       filters: filters, // Додаємо фільтри до запису
       discount: req.body.discount,
     });
-
+    // console.log("volumes", volumes);
     res.status(201).json({ data: newRecord });
   } catch (error) {
     next(error);
@@ -309,6 +366,33 @@ export const updateBrandsAdmin = async (req, res, next) => {
       message: "Brand updated successfully",
       data: feedbackMessage,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createSkinNeed = async (req, res, next) => {
+  try {
+    const { name, label } = req.body;
+
+    if (!name || !label) {
+      throw new HttpError(400, "Name and label are required");
+    }
+
+    const skin = await SkinNeed.findOne({ name });
+    if (skin) throw HttpError(409, "type already exists");
+    const newSkin = await SkinNeed.create({ ...req.body });
+    res.status(201).json({ skinNeed: newSkin });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSkinNeed = async (req, res, next) => {
+  try {
+    const skin = await SkinNeed.find();
+
+    res.json(skin);
   } catch (error) {
     next(error);
   }
