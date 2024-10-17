@@ -13,7 +13,6 @@ const orderSchema = new Schema(
       phone: { type: String, required: true },
       email: { type: String, required: true },
       address: {
-        area: { type: String, required: true },
         city: { type: String, required: true },
         office: { type: String, required: true },
       },

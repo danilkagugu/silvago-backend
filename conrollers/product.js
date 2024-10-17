@@ -128,7 +128,7 @@ export const getProductById = async (req, res, next) => {
     if (!volume) {
       return res.status(404).send("Volume not found");
     }
-    console.log("🎶🎶😎");
+    // console.log("🎶🎶😎");
 
     res.status(200).json({ product, volume });
   } catch (error) {
@@ -139,7 +139,7 @@ export const getProductById = async (req, res, next) => {
 export const addProductToBasket = async (req, res, next) => {
   try {
     const { quantity, volume, price, slug } = req.body;
-    console.log("slug: ", req.params);
+    // console.log("slug: ", req.params);
 
     const product = await Product.findOne({ "volumes.slug": req.params.slug });
     console.log("product: ", product);
@@ -179,9 +179,10 @@ export const addProductToBasket = async (req, res, next) => {
 export const deleteProductFromBasket = async (req, res, next) => {
   try {
     const { productId, volume } = req.body;
-    console.log("volume: ", volume);
-    console.log("productId: ", productId);
-    // console.log("req.body: ", req.body);
+    // console.log("slug: ", slug);
+    // console.log("volume: ", volume);
+    // console.log("productId: ", productId);
+    console.log("req.body: ", req.body);
 
     const basket = await Basket.findOne({ owner: req.user.id });
     basket.products = basket.products.filter(
