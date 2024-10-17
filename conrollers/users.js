@@ -13,9 +13,7 @@ export const getCurrentUser = async (req, res, next) => {
       phone: user.phone,
       email: user.email,
       password: user.password,
-      area: user.area,
       city: user.city,
-      office: user.office,
     };
     res.status(200).json(feedbackMessage).end();
   } catch (error) {
@@ -25,15 +23,13 @@ export const getCurrentUser = async (req, res, next) => {
 
 export const updateUser = async (req, res, next) => {
   try {
-    const { name, serName, phone, email, area, city, office } = req.body;
+    const { name, serName, phone, email, city } = req.body;
     const updateData = {
       ...(name && { name }),
       ...(serName && { serName }),
       ...(phone && { phone }),
       ...(email && { email }),
-      ...(area && { area }),
       ...(city && { city }),
-      ...(office && { office }),
     };
 
     const { error } = updateSchema.validate(updateData, {
@@ -54,9 +50,7 @@ export const updateUser = async (req, res, next) => {
       name: updatedUser.name,
       serName: updatedUser.serName,
       phone: updatedUser.phone,
-      area: updatedUser.area,
       city: updatedUser.city,
-      office: updatedUser.office,
     };
     res.status(200).json({
       message: "User updated successfully",
