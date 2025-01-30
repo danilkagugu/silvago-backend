@@ -7,27 +7,42 @@ const basketSchema = new Schema({
   },
   products: [
     {
-      product: {
-        type: Schema.Types.ObjectId,
-        ref: "product",
+      idTorgsoft: {
+        type: Number,
         required: true,
+      },
+      productName: {
+        type: String,
       },
       price: {
         type: Number,
-        // required: true,
+        required: true,
       },
       quantity: {
         type: Number,
         default: 1,
       },
+      quantityStock: {
+        type: Number,
+        // default: 1,
+      },
       volume: {
         type: Number, // додано поле для об'єму
         required: true,
       },
+      tone: { type: Number, required: false }, // Тон, наприклад "№23" або "№21"
       slug: {
         type: String,
-        ref: "product.volumes.slug",
-        unique: true,
+        required: true,
+        // unique: true,
+      },
+      image: { type: String, required: true },
+      discount: {
+        type: Number,
+        default: 0,
+      },
+      barcode: {
+        type: String,
       },
     },
   ],

@@ -1,0 +1,32 @@
+{
+  "Client": {
+    "Name": "Данило",
+    "MPhone": "+380506863801",
+    "ZIP": "",
+    "Country": "Україна",
+    "Region": "",
+    "City": "Київ",
+    "Address": "вул. Гіршмана,16",
+    "EMail": "danil@gmail.com"
+  },
+  "Options": {
+    "SaleType": "1",
+    "Comment": "Замовлення з інтернет-магазину",
+    "OrderNumber": "179",
+    "DeliveryCondition": "Нова Пошта",
+    "DeliveryAddress": "Відділення №1: вул. Пирогівський шлях, 135",
+    "OrderDate": "2024-12-12T12:42:22.339Z"
+  },
+  "Goods": [
+    {
+      "GoodID": "11",
+      "Price": 565,
+      "Count": 1
+    },
+    {
+      "GoodID": "6",
+      "Price": 1090,
+      "Count": 1
+    }
+  ]
+}

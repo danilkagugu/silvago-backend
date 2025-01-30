@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import HttpError from "../helpers/HttpError.js";
 import User from "../models/user.js";
 import "dotenv/config";
+import Client from "../models/userTorgsoft.js";
 
 const authMiddlewares = (req, res, next) => {
   const { authorization = "" } = req.headers;
@@ -13,7 +14,7 @@ const authMiddlewares = (req, res, next) => {
     if (err) next(HttpError(401, "invalid token"));
 
     try {
-      const user = await User.findById(decode.id);
+      const user = await Client.findById(decode.id);
 
       if (!user) throw HttpError(401, "Not authorized");
 

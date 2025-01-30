@@ -1,0 +1,32 @@
+{
+  "Client": {
+    "Name": "Данило Янішевський",
+    "MPhone": "+38 (380) 506-86-38",
+    "ZIP": "",
+    "Country": "Україна",
+    "Region": "",
+    "City": "Коростишів",
+    "Address": "вул. Гіршмана,16",
+    "EMail": "danulo1@gmail.com"
+  },
+  "Options": {
+    "SaleType": "1",
+    "Comment": "Замовлення з інтернет-магазину",
+    "OrderNumber": "195",
+    "DeliveryCondition": "Нова Пошта",
+    "DeliveryAddress": "Відділення №2 (до 30 кг): вул. Героїв Небесної Сотні, 56",
+    "OrderDate": "2024-12-14T11:04:12.916Z"
+  },
+  "Goods": [
+    {
+      "GoodID": "9",
+      "Price": 750,
+      "Count": 1
+    },
+    {
+      "GoodID": "14",
+      "Price": 575,
+      "Count": 1
+    }
+  ]
+}
