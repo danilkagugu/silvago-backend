@@ -1,0 +1,27 @@
+{
+  "Client": {
+    "Name": "Шиш Тетяна Іванівна",
+    "MPhone": "380682825562",
+    "ZIP": "",
+    "Country": "Україна",
+    "Region": "Житомирська",
+    "City": "Коростишів",
+    "EMail": "das.dd43031@gmail.com"
+  },
+  "Options": {
+    "SaleType": "1",
+    "Comment": "Замовлення з інтернет-магазину",
+    "OrderNumber": "221",
+    "DeliveryCondition": "Нова Пошта",
+    "DeliveryAddress": "Відділення №1: вул. Івана Богуна, 49/5",
+    "OrderDate": "2024-12-17T13:34:14.522Z",
+    "BonusPay": 0
+  },
+  "Goods": [
+    {
+      "GoodID": "5",
+      "Price": 960,
+      "Count": 1
+    }
+  ]
+}

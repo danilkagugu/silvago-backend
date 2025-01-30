@@ -1,0 +1,32 @@
+{
+  "Client": {
+    "Name": "Данилоооо Яніш Янішевс",
+    "MPhone": "0675746830",
+    "ZIP": "61072",
+    "Country": "Україна",
+    "Region": "Харківська",
+    "City": "Коростишівввв",
+    "Address": "вул. Гіршмана,16",
+    "EMail": "info@torgsoft.com.ua"
+  },
+  "Options": {
+    "SaleType": "1",
+    "Comment": "Код під'їзду 1685",
+    "OrderNumber": "22",
+    "DeliveryCondition": "Нова Пошта",
+    "DeliveryAddress": "Харків, вул. Сумська, 124 (Відділення №33)",
+    "OrderDate": "2020-02-04 18:19:44"
+  },
+  "Goods": [
+    {
+      "GoodID": "7",
+      "Price": "300",
+      "Count": "2"
+    },
+    {
+      "GoodID": "11",
+      "Price": "565",
+      "Count": "1"
+    }
+  ]
+}

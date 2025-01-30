@@ -104,12 +104,14 @@ const productSchema = new Schema({
 });
 
 productSchema.pre("save", function (next) {
+  const slugBase = slugify(this.name, { lower: true, strict: true });
+
   this.volumes.forEach((volume) => {
     if (!volume.slug) {
-      const slugBase = slugify(this.name, { lower: true, strict: true });
       volume.slug = `${slugBase}-${volume.volume}ml`;
     }
   });
+
   next();
 });
 

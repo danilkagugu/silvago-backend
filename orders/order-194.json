@@ -1,0 +1,67 @@
+{
+  "Client": {
+    "Name": "Данило Янішевський",
+    "MPhone": "0506863801",
+    "ZIP": "",
+    "Country": "Україна",
+    "Region": "",
+    "City": "Коростишів",
+    "Address": "вул. Гіршмана,16",
+    "EMail": "danulo1@gmail.com"
+  },
+  "Options": {
+    "SaleType": "1",
+    "Comment": "Замовлення з інтернет-магазину",
+    "OrderNumber": "194",
+    "DeliveryCondition": "Нова Пошта",
+    "DeliveryAddress": "Відділення №1: вул. Івана Богуна, 49/5",
+    "OrderDate": "2024-12-14T09:13:35.656Z"
+  },
+  "Goods": [
+    {
+      "GoodID": "32",
+      "Price": 550,
+      "Count": 1
+    },
+    {
+      "GoodID": "15",
+      "Price": 550,
+      "Count": 1
+    },
+    {
+      "GoodID": "16",
+      "Price": 25,
+      "Count": 1
+    },
+    {
+      "GoodID": "17",
+      "Price": 25,
+      "Count": 1
+    },
+    {
+      "GoodID": "18",
+      "Price": 550,
+      "Count": 1
+    },
+    {
+      "GoodID": "27",
+      "Price": 675,
+      "Count": 1
+    },
+    {
+      "GoodID": "28",
+      "Price": 15,
+      "Count": 1
+    },
+    {
+      "GoodID": "31",
+      "Price": 25,
+      "Count": 1
+    },
+    {
+      "GoodID": "30",
+      "Price": 550,
+      "Count": 1
+    }
+  ]
+}

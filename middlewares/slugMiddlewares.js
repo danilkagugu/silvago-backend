@@ -5,7 +5,7 @@ const autoGenerateItemSlugs = (req, res, next) => {
     req.body.items = req.body.items.map((item) => {
       const name = item.name || "";
       const slug = item.slug || generateSlug(name); // Генерація slug для кожного елемента
-      console.log(`Generated slug for '${name}': ${slug}`); // Логування результату генерації
+      // console.log(`Generated slug for '${name}': ${slug}`);
       return {
         name,
         slug,

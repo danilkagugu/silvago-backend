@@ -8,20 +8,21 @@ const orderSchema = new Schema(
       ref: "user",
     },
     user: {
-      name: { type: String, required: true },
-      serName: { type: String, required: true },
+      fullName: { type: String, required: true },
+      // lastName: { type: String, required: true },
+      // middleName: { type: String },
       phone: { type: String, required: true },
       email: { type: String, required: true },
-      address: {
-        city: { type: String, required: true },
-        office: { type: String, required: true },
-      },
+      region: { type: String, required: true },
+      city: { type: String, required: true },
+      office: { type: String, required: true },
+      comment: { type: String },
     },
     basket: [
       {
-        product: {
+        _id: {
           type: Schema.Types.ObjectId,
-          ref: "product",
+          ref: "goods",
           required: true,
         },
         productName: {
@@ -41,6 +42,7 @@ const orderSchema = new Schema(
           type: Number,
           required: true,
         },
+        tone: { type: Number, required: false }, // Тон, наприклад "№23" або "№21"
         discount: {
           type: Number,
           default: 0,

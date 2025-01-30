@@ -18,12 +18,14 @@ import {
 } from "../conrollers/admin.js";
 import { uploadMiddleware } from "../middlewares/upload.js";
 import autoGenerateItemSlugs from "../middlewares/slugMiddlewares.js";
+import { getSkinFilters } from "../conrollers/torgsoft.js";
 const adminRouter = express.Router();
 
 adminRouter.get("/users", getUsers);
 adminRouter.post("/add-product", uploadMiddleware, createProductAdmin);
 adminRouter.post("/create-skin", createSkinNeed);
 adminRouter.get("/skin", getSkinNeed);
+adminRouter.get("/filter", getSkinFilters);
 adminRouter.put("/products/:id", uploadMiddleware, updateProductsAdmin);
 adminRouter.get("/products", getProducts);
 adminRouter.get("/products/one/:id", getOneProduct);

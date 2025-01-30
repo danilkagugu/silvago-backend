@@ -1,0 +1,37 @@
+{
+  "Client": {
+    "Name": "Шиш Тетяна ",
+    "MPhone": "380682825562",
+    "ZIP": "",
+    "Country": "Україна",
+    "Region": "",
+    "City": "Харків",
+    "Address": "вул. Гіршмана,16",
+    "EMail": "das.dd43031@gmail.com"
+  },
+  "Options": {
+    "SaleType": "1",
+    "Comment": "Замовлення з інтернет-магазину",
+    "OrderNumber": "203",
+    "DeliveryCondition": "Нова Пошта",
+    "DeliveryAddress": "Відділення №1: вул. Польова, 67",
+    "OrderDate": "2024-12-15T09:30:49.453Z"
+  },
+  "Goods": [
+    {
+      "GoodID": "11",
+      "Price": 565,
+      "Count": 1
+    },
+    {
+      "GoodID": "5",
+      "Price": 960,
+      "Count": 1
+    },
+    {
+      "GoodID": "6",
+      "Price": 1090,
+      "Count": 1
+    }
+  ]
+}

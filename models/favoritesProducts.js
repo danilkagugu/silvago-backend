@@ -15,37 +15,36 @@ const favoritesProductsSchema = new Schema({
       productName: {
         type: String,
       },
-
       productPrice: {
         type: Number,
       },
       image: {
         type: String,
       },
-      volumes: [
-        {
-          volume: {
-            type: Number,
-            required: true,
-          },
-          price: {
-            type: Number,
-            required: true,
-          },
-          quantity: {
-            type: Number,
-            required: true,
-          },
-          discount: {
-            type: Number,
-            default: 0,
-          },
-          slug: {
-            type: String,
-            unique: true,
-          },
-        },
-      ],
+      volume: {
+        type: Number, // зберігаємо об'єм, наприклад, 50 мл
+        required: true,
+      },
+      volumeId: {
+        type: String,
+        required: true,
+      },
+      price: {
+        type: Number, // зберігаємо ціну для конкретного об'єму
+        required: true,
+      },
+      discount: {
+        type: Number,
+        default: 0,
+      },
+      slug: {
+        type: String,
+        unique: true,
+      },
+      quantityInStock: {
+        type: Number, // зберігаємо об'єм, наприклад, 50 мл
+        required: true,
+      },
     },
   ],
 });

@@ -1,0 +1,32 @@
+{
+  "Client": {
+    "Name": "Данило Янішевський",
+    "MPhone": "0506863801",
+    "ZIP": "",
+    "Country": "Україна",
+    "Region": "",
+    "City": "Дніпро",
+    "Address": "вул. Гіршмана,16",
+    "EMail": "danulo1@gmail.com"
+  },
+  "Options": {
+    "SaleType": "1",
+    "Comment": "Замовлення з інтернет-магазину",
+    "OrderNumber": "193",
+    "DeliveryCondition": "Нова Пошта",
+    "DeliveryAddress": "Відділення №1: вул. Маршала Малиновського, 114",
+    "OrderDate": "2024-12-14T09:10:37.186Z"
+  },
+  "Goods": [
+    {
+      "GoodID": "5",
+      "Price": 960,
+      "Count": 1
+    },
+    {
+      "GoodID": "6",
+      "Price": 1090,
+      "Count": 1
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import Category from "../models/category.js";
 import Product from "../models/product.js";
 import SkinNeed from "../models/skinNeed.js";
 import User from "../models/user.js";
+import Client from "../models/userTorgsoft.js";
 import { createProductSchema } from "../schemas/productSchema.js";
 import * as fs from "node:fs/promises";
 
@@ -194,7 +195,7 @@ export const updateProductsAdmin = async (req, res, next) => {
 
 export const getUsers = async (req, res, next) => {
   try {
-    const users = await User.find();
+    const users = await Client.find();
 
     res.json(users);
   } catch (error) {
