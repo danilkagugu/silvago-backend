@@ -92,6 +92,7 @@ export async function parseGoodsFile() {
       skinNeeds: row[51], // Потреби шкіри
       modelName: row[15], // назва моделі
       modelId: row[42], // Id моделі
+      measure: row[39],
     }));
 
     // console.log("Розпарсені товари:", products);
@@ -134,6 +135,7 @@ export async function saveProductsToDb(products) {
           brand: product.brand,
           country: product.country,
           categories: product.categories,
+          measure: product.measure,
           variations: [],
           // skinNeeds: product.skinNeeds.trim() === "" ? null : product.skinNeeds,
         };

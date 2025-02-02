@@ -22,6 +22,7 @@ const productSchema = new Schema({
   modelId: { type: Number, required: true, unique: true }, // ID моделі
   brand: { type: String, required: true }, // Бренд
   country: { type: String, required: true }, // Країна виробник
+  measure: { type: String, required: true }, // Країна виробник
   categories: [
     {
       idTorgsoft: { type: Number, required: true, unique: true },
