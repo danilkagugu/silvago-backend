@@ -5,7 +5,7 @@ const variationSchema = new Schema({
   fullName: { type: String, required: true }, // Назва товару
 
   volume: { type: Number, required: true }, // Об'єм, наприклад "1 мл", "30 мл"
-  tone: { type: Number, required: false }, // Тон, наприклад "№23" або "№21"
+  tone: { type: String, required: false }, // Тон, наприклад "№23" або "№21"
   retailPrice: { type: Number, required: true }, // Ціна
   discountPrice: { type: Number, required: false }, // Ціна зі знижкою (опціонально)
   discount: { type: Number, required: false }, // Знижка у відсотках
