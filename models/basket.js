@@ -30,7 +30,7 @@ const basketSchema = new Schema({
         type: Number, // додано поле для об'єму
         required: true,
       },
-      tone: { type: Number, required: false }, // Тон, наприклад "№23" або "№21"
+      tone: { type: String, required: false }, // Тон, наприклад "№23" або "№21"
       slug: {
         type: String,
         required: true,

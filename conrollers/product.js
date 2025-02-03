@@ -373,12 +373,20 @@ export const addProductToBasket = async (req, res, next) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-
     // Знаходимо варіацію товару за об'ємом і тоном
-    const volumeDetails = product.variations.find(
-      (v) => v.volume === volume && v.tone === tone
-    );
-    // console.log("volumeDetails", volumeDetails);
+
+    const volumeDetails = product.variations.find((v) => {
+      const parsedTone =
+        typeof v.tone === "string" && v.tone.match(/\d+/)
+          ? parseInt(v.tone.match(/\d+/)[0])
+          : null;
+
+      return (
+        v.volume === volume &&
+        (parsedTone === Number(tone) || (tone === null && v.tone === null))
+      );
+    });
+    console.log("volumeDetails", volumeDetails);
     if (!volumeDetails) {
       return res
         .status(400)
@@ -480,7 +488,6 @@ export const sendOrder = async (req, res, next) => {
     const basketFromDB = await Basket.findOne({ owner: req.user.id }).populate(
       "products._id"
     );
-    // console.log("basketFromDB", basketFromDB);
     if (!basketFromDB || basketFromDB.products.length === 0) {
       return res.status(400).json({ message: "Basket is empty" });
     }
@@ -497,12 +504,12 @@ export const sendOrder = async (req, res, next) => {
 
     for (const productItem of basketFromDB.products) {
       // console.log("basketFromDB: ", basketFromDB);
-      // console.log("productItem: ", productItem);
+      console.log("productItem: ", productItem);
       const product = await Goods.findOne(
         { "variations._id": productItem._id },
         { "variations.$": 1 }
       );
-      // console.log("product", product);
+      console.log("product", product);
       if (!product || !product.variations[0]) {
         return res.status(400).json({ message: "Product variation not found" });
       }
@@ -553,7 +560,7 @@ export const sendOrder = async (req, res, next) => {
       },
       Goods: goods,
     };
-
+    console.log("orderForTorgsoft", orderForTorgsoft);
     await uploadOrderToFTP(orderForTorgsoft);
 
     const newOrder = new Order({
@@ -582,7 +589,7 @@ export const sendOrder = async (req, res, next) => {
       ),
       allQuantity: goods.reduce((sum, item) => sum + item.Count, 0),
     });
-
+    console.log("newOrder", newOrder);
     await newOrder.save();
 
     // 8️⃣ **Очищення кошика**
