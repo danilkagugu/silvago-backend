@@ -1,3 +1,7 @@
+# Ігнорування файлів у папці dataBase
+dataBase/TSGoods.trs
+dataBase/TSClients.trs
+
 tmp/*
 !tmp/.gitkeep
 

@@ -12,10 +12,10 @@ import { Filter } from "../models/filters.js";
 // Шляхи до папок
 const sourceFolder = "C:\\Журнал Torgsoft";
 const destinationFolder =
-  "C:\\Users\\home\\Documents\\GitHub\\silvago-backend\\dataBase";
-
+  "C:\\Users\\GGEZ\\Documents\\GitHub\\silvago-backend\\dataBase";
+// "C:\Users\GGEZ\Documents\GitHub\silvago-backend\dataBase"
 const goodsFile = path.join(destinationFolder, "TSGoods.trs");
-const clientsFile = path.join(destinationFolder, "TSClients.trs");
+// const clientsFile = path.join(destinationFolder, "TSClients.trs");
 
 async function copyFile(fileName) {
   const sourcePath = path.join(sourceFolder, fileName);
@@ -33,7 +33,7 @@ export const getBd = async (req, res) => {
   try {
     // Копіюємо файли з Torgsoft
     const results = await Promise.all([
-      copyFile("TSClients.trs"),
+      // copyFile("TSClients.trs"),
       copyFile("TSGoods.trs"),
     ]);
 

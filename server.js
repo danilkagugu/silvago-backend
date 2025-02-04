@@ -1,6 +1,6 @@
+import "dotenv/config";
 import mongoose from "mongoose";
 import app from "./app.js";
-import "dotenv/config";
 import FtpSrv from "ftp-srv";
 import path from "path";
 import {
@@ -45,7 +45,7 @@ async function run() {
     const torgsoftFolder = path.resolve(
       "C:\\Журнал Torgsoft\\Приймання замовлень\\3"
     );
-
+console.log('FTP_PASS_SILVAGO',FTP_PASS_SILVAGO);
     // Логіка доступу для різних користувачів
     ftpServer.on("login", ({ username, password }, resolve, reject) => {
       if (username === FTP_USER_SILVAGO && password === FTP_PASS_SILVAGO) {

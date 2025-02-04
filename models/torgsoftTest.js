@@ -8,7 +8,7 @@ const variationSchema = new Schema({
   tone: { type: String, required: false }, // Тон, наприклад "№23" або "№21"
   retailPrice: { type: Number, required: true }, // Ціна
   discountPrice: { type: Number, required: false }, // Ціна зі знижкою (опціонально)
-  discount: { type: Number, required: false }, // Знижка у відсотках
+  discount: { type: String, required: false }, // Знижка у відсотках
   quantity: { type: Number, required: true, default: 0 }, // Кількість в наявності
   barcode: { type: String, required: true }, // Унікальний штрихкод
   slug: { type: String, required: true, unique: true }, // Унікальний slug
