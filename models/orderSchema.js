@@ -42,7 +42,7 @@ const orderSchema = new Schema(
           type: Number,
           required: true,
         },
-        tone: { type: Number, required: false }, // Тон, наприклад "№23" або "№21"
+        tone: { type: String, required: false }, // Тон, наприклад "№23" або "№21"
         discount: {
           type: Number,
           default: 0,

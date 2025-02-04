@@ -1,0 +1,37 @@
+{
+  "Client": {
+    "Name": "Янішевський Данило Вадимович",
+    "MPhone": "380506863801",
+    "ZIP": "",
+    "Country": "Україна",
+    "Region": "Житомирська",
+    "City": "Коростишів",
+    "EMail": "danulo1@gmail.com"
+  },
+  "Options": {
+    "SaleType": "1",
+    "Comment": "Замовлення з інтернет-магазину",
+    "OrderNumber": "232",
+    "DeliveryCondition": "Нова Пошта",
+    "DeliveryAddress": "Відділення №1: вул. Івана Богуна, 49/5",
+    "OrderDate": "2025-02-02T23:58:23.860Z",
+    "BonusPay": 0
+  },
+  "Goods": [
+    {
+      "GoodID": "1661",
+      "Price": 680,
+      "Count": 1
+    },
+    {
+      "GoodID": "874",
+      "Price": 20,
+      "Count": 1
+    },
+    {
+      "GoodID": "876",
+      "Price": 14,
+      "Count": 1
+    }
+  ]
+}
