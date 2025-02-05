@@ -36,6 +36,7 @@ export const createProduct = async (req, res, next) => {
 };
 
 export const getProducts = async (req, res, next) => {
+  console.log("wrfsdsfgrvd😂🌹👍👍");
   try {
     const products = await Goods.find();
 
@@ -479,7 +480,6 @@ export const getBasket = async (req, res, next) => {
 export const sendOrder = async (req, res, next) => {
   try {
     const { user } = req.body;
-    console.log("user💋👏👏: ", user);
 
     if (!user) {
       return res.status(400).json({ message: "Invalid input data" });
@@ -795,9 +795,8 @@ export const getBrandsTorgsoft = async (req, res, next) => {
 
 export const getFilteredProducts = async (req, res, next) => {
   try {
-    const { category, brand, price } = req.query;
-    console.log("category: ", category);
-
+    const { category, brand, price, page = 1, limit = 20 } = req.query;
+    console.log("x😒😢🎁🐱‍💻😍😎✌✌");
     const query = {};
 
     // Фільтрація за брендом
@@ -812,14 +811,17 @@ export const getFilteredProducts = async (req, res, next) => {
     // Фільтрація за категорією
     if (category) {
       const categoryIds = category.split(",");
-      query["categories.idTorgsoft"] = { $in: categoryIds.map(Number) }; // Фільтруємо за idTorgsoft
+      query["categories.idTorgsoft"] = { $in: categoryIds.map(Number) };
     }
 
-    const products = await Goods.find(query);
+    // Отримання товарів з урахуванням пагінації
+    const products = await Goods.find(query)
+      .skip((page - 1) * limit) // Пропускаємо попередні сторінки
+      .limit(Number(limit)); // Обмежуємо кількість товарів на сторінці
 
     const result = products
       .map((product) => {
-        // Фільтруємо варіації товару за ціною, якщо фільтр ціни застосований
+        // Фільтруємо варіації товару за ціною
         const filteredVariations = price
           ? product.variations.filter((variant) => {
               const [minPrice, maxPrice] = price.split("-").map(Number);
@@ -830,17 +832,14 @@ export const getFilteredProducts = async (req, res, next) => {
             })
           : product.variations;
 
-        // Якщо жодна варіація не відповідає діапазону ціни, виключаємо товар
         if (price && filteredVariations.length === 0) {
           return null;
         }
 
-        // Знаходимо варіацію за замовчуванням (isDefault: true)
         const defaultVariation = product.variations.find(
           (variant) => variant.isDefault
         );
 
-        // Якщо є фільтр ціни, пріоритет у варіації, що відповідає діапазону
         const activeVariation =
           price && filteredVariations.length > 0
             ? filteredVariations[0]
@@ -848,13 +847,20 @@ export const getFilteredProducts = async (req, res, next) => {
 
         return {
           ...product._doc,
-          variations: product.variations, // Зберігаємо всі варіації
-          activeVariation, // Активна варіація для відображення
+          variations: product.variations,
+          activeVariation,
         };
       })
-      .filter((product) => product !== null); // Виключаємо товари, які не відповідають діапазону
+      .filter((product) => product !== null);
 
-    res.json(result);
+    // Відповідь з результатом та інформацією про пагінацію
+    const totalProducts = await Goods.countDocuments(query);
+    res.json({
+      products: result,
+      currentPage: Number(page),
+      totalPages: Math.ceil(totalProducts / limit),
+      totalProducts,
+    });
   } catch (error) {
     next(error);
   }
