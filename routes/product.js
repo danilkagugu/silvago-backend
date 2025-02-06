@@ -13,6 +13,7 @@ import {
   getBasket,
   getBrandsTorgsoft,
   getCategory,
+  getCountByFilter,
   getDefaultVariations,
   getDiscountProducts,
   getFavoriteProducts,
@@ -71,5 +72,6 @@ productRouter.get("/category-torgsoft", getCategoriesTree);
 productRouter.get("/search", searchProducts);
 productRouter.get("/top-selling-products", getTopSellingProducts);
 productRouter.get("/discount-products", getDiscountProducts);
+productRouter.get("/filter", getCountByFilter);
 
 export default productRouter;

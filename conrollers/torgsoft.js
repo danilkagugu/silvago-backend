@@ -161,7 +161,7 @@ export async function saveProductsToDb(products) {
           slug: `${slugify(product.modelName, {
             lower: true,
             strict: true,
-          })}${product.tone ? `-${product.tone}` : ""}-${product.volume}ml`,
+          })}${product.tone ? `-${product.tone}` : ""}-${product.volume.trim()}${slugify(product.measure.trim(), { lower: true, strict: true })}`,
           isDefault: false,
         });
       }
