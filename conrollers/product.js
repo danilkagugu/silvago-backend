@@ -967,3 +967,51 @@ export const getProductByIdTest = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const getCountByFilter = async (req, res) => {
+  try {
+    // Агрегування по брендам
+    const brandsCount = await Goods.aggregate([
+      {
+        $group: {
+          _id: "$brand",       // Групування за назвою бренду
+          count: { $sum: 1 }   // Рахуємо кількість товарів для кожного бренду
+        }
+      },
+      {
+        $lookup: {
+          from: "brandtorgsofts",      // Ім'я колекції з брендами
+          localField: "_id",          // Поле у Goods (назва бренду)
+          foreignField: "name",       // Поле у BrandTorgsoft (назва бренду)
+          as: "brandInfo"             // Поле, в яке буде записано результат об'єднання
+        }
+      },
+      {
+        $unwind: "$brandInfo"         // Розгортаємо масив brandInfo у звичайний об'єкт
+      },
+      {
+        $project: {
+          _id: "$brandInfo._id",      // Повертаємо унікальний `_id` з BrandTorgsoft
+          name: "$brandInfo.name",    // Повертаємо назву бренду
+          numberId: "$brandInfo.numberId", // Повертаємо `numberId` бренду
+          count: 1                    // Повертаємо кількість товарів
+        }
+      },
+      {
+        $sort: { name: 1 }             // Сортуємо бренди за назвою
+      }
+    ]);
+
+    // Агрегування по категоріям
+    const categoriesCount = await Goods.aggregate([
+      { $unwind: "$categories" },
+      { $group: { _id: "$categories.name", count: { $sum: 1 } } },
+    ]);
+
+    res.json({ brandsCount, categoriesCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
