@@ -796,10 +796,14 @@ export const getBrandsTorgsoft = async (req, res, next) => {
 export const getFilteredProducts = async (req, res, next) => {
   try {
     const { category, brand, price, page = 1, limit = 20 } = req.query;
+    console.log('limit: ', limit);
+    console.log('limit: ',typeof limit);
 
-    console.log("price: ", price);
-    console.log("price: ", typeof price);
-    console.log("req.query: ", req.query);
+    console.log("Parsed Filters:", req.query);
+
+    // console.log("price: ", price);
+    // console.log("price: ", typeof price);
+    // console.log("req.query: ", req.query);
 
     const query = {};
 
@@ -810,7 +814,7 @@ export const getFilteredProducts = async (req, res, next) => {
       // Отримуємо назви брендів за їх ідентифікаторами
       const brands = await BrandTorgsoft.find({ numberId: { $in: brandIds } });
       const brandNames = brands.map((brand) => brand.name);
-      console.log("brandNames: ", brandNames);
+      // console.log("brandNames: ", brandNames);
 
       // Якщо немає відповідних брендів, повертаємо порожній результат
       if (brandNames.length === 0) {
@@ -861,8 +865,7 @@ export const getFilteredProducts = async (req, res, next) => {
     let minPrice, maxPrice;
     if (price) {
       [minPrice, maxPrice] = price.split(",").map(Number); // Конвертуємо значення в числа
-      console.log("maxPrice: ", maxPrice);
-      console.log("minPrice: ", minPrice);
+      
       if (!isNaN(minPrice) || !isNaN(maxPrice)) {
         query["variations.retailPrice"] = {};
         if (!isNaN(minPrice)) query["variations.retailPrice"].$gte = minPrice;
@@ -875,7 +878,7 @@ export const getFilteredProducts = async (req, res, next) => {
       .skip((page - 1) * limit)
       .limit(Number(limit))
       .lean();
-    console.log("products", products);
+    // console.log("products", products);
     const filteredProducts = products
       .map((product) => {
         const filteredVariations = price
@@ -919,13 +922,15 @@ export const getFilteredProducts = async (req, res, next) => {
 
     // Підрахунок загальної кількості товарів для пагінації
     const totalProducts = await Goods.countDocuments(query);
-    console.log("totalProducts: ", totalProducts);
+    console.log('totalProducts: ', totalProducts);
+    console.log('limit: ', limit);
+    console.log("totalProducts: ", Math.ceil(totalProducts / limit));
 
     // const minPrice = await Goods.findOne(query).sort({ "variations.retailPrice": 1 }).select("variations.retailPrice").limit(1);
     // const maxPrice = await Goods.findOne(query).sort({ "variations.retailPrice": -1 }).select("variations.retailPrice").limit(1);
 
-    console.log("minRetailPrice: ", minRetailPrice);
-    console.log("maxRetailPrice: ", maxRetailPrice);
+    // console.log("minRetailPrice: ", minRetailPrice);
+    // console.log("maxRetailPrice: ", maxRetailPrice);
 
     // Відправка відповіді
     res.json({

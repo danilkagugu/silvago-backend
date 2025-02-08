@@ -35,6 +35,7 @@ import {
 } from "../conrollers/product.js";
 import authMiddlewares from "../middlewares/authMiddlewares.js";
 import { getBd, getCategoriesTree } from "../conrollers/torgsoft.js";
+import { parseFiltersMiddleware } from "../middlewares/parseUrlFiltersMiddlewares.js";
 
 const productRouter = express.Router();
 
@@ -46,7 +47,7 @@ productRouter.get("/sync", getBd);
 productRouter.get("/get/goods", getGoods);
 productRouter.post("/get-variation", changeProductVariation);
 productRouter.get("/get-default-variation", getDefaultVariations);
-productRouter.get("/getcatalog", getFilteredProducts);
+productRouter.get("/getcatalog/*",parseFiltersMiddleware, getFilteredProducts);
 
 productRouter.get("/get/brand", getBrandsTorgsoft);
 productRouter.get("/price-range", getPriceRange);
