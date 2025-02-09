@@ -865,36 +865,43 @@ export const getFilteredProducts = async (req, res, next) => {
     let products = await Goods.find(query)
       .skip((page - 1) * limit)
       .limit(Number(limit))
-      .lean();
+      .lean()
+      .sort({ randomOrderKey: 1, })
+      // .sort({ brand: 1, modelName: 1 });
+      // products.sort((a, b) => a.modelName.localeCompare(b.modelName, "uk", { sensitivity: "base" }));
 
-    const filteredProducts = products
-      .map((product) => {
-        const filteredVariations = price
-          ? product.variations.filter(
-              (variant) =>
-                variant.retailPrice >= minPrice &&
-                variant.retailPrice <= maxPrice
-            )
-          : product.variations;
-
-        // Повертаємо всі варіації, але з активною варіацією для фільтрації за ціною
+      const filteredProducts = products.map((product) => {
+        let filteredVariations = product.variations;
+        
+        // Фільтруємо варіації за ціною, якщо заданий фільтр
+        if (price) {
+          filteredVariations = product.variations.filter(
+            (variant) =>
+              variant.retailPrice >= minPrice &&
+              variant.retailPrice <= maxPrice
+          );
+        }
+  
+        // Обираємо активну варіацію: спочатку з isDefault, якщо її немає — першу зі списку
+        const activeVariation =
+          filteredVariations.find((v) => v.isDefault) ||
+          filteredVariations[0] ||
+          product.variations[0];
+  
         return {
-          ...product._doc,
-          variations: product.variations, // Показуємо всі варіації
-          activeVariation:
-            filteredVariations.find((v) => v.isDefault) ||
-            filteredVariations[0] ||
-            product.variations[0],
+          ...product,
+          variations: product.variations, // Виводимо всі варіації
+          activeVariation,
         };
-      })
-      .filter((product) => product.activeVariation !== null);
+      });
+  
 
     // Підрахунок загальної кількості товарів для пагінації
     const totalProducts = await Goods.countDocuments(query);
 
     // Відправка відповіді
     res.json({
-      products: products,
+      products: filteredProducts,
       currentPage: Number(page),
       totalPages: Math.ceil(totalProducts / limit),
       totalProducts,
@@ -1008,49 +1015,303 @@ export const getProductByIdTest = async (req, res, next) => {
   }
 };
 
+
+// export const getCountByFilter = async (req, res) => {
+//   try {
+//     const { brands, categories } = req.query;
+
+//     // Отримання всіх брендів і категорій
+//     const allBrands = await BrandTorgsoft.find().lean();
+//     const allCategories = await CategoryTorg.find().lean();
+
+//     // Створюємо мапу для брендів
+//     const brandMap = allBrands.reduce((acc, brand) => {
+//       acc[brand.numberId] = brand.name;
+//       return acc;
+//     }, {});
+
+//     // Перетворення brands на назви брендів
+//     let brandNames = [];
+//     if (brands) {
+//       brandNames = brands.split(",").map((id) => brandMap[Number(id)]).filter(Boolean);
+//     }
+
+//     // Формування фільтра
+//     const query = {};
+//     if (brandNames.length) {
+//       query.brand = { $in: brandNames };
+//     }
+//     if (categories) {
+//       query["categories.idTorgsoft"] = { $in: categories.split(",").map(Number) };
+//     }
+
+//     // --- Підрахунок товарів у брендах ---
+//     const brandCounts = await Goods.aggregate([
+//       { $match: query }, // Використовуємо фільтри
+//       {
+//         $lookup: {
+//           from: "brandtorgsofts",
+//           localField: "brand",
+//           foreignField: "name",
+//           as: "brandInfo",
+//         },
+//       },
+//       { $unwind: "$brandInfo" },
+//       {
+//         $group: {
+//           _id: "$brandInfo.numberId", // Підраховуємо за `numberId`
+//           count: { $sum: 1 },
+//         },
+//       },
+//     ]);
+
+//     // --- Підрахунок товарів у категоріях ---
+//     const categoryCounts = await Goods.aggregate([
+//       { $match: query },
+//       { $unwind: "$categories" },
+//       {
+//         $group: {
+//           _id: "$categories.idTorgsoft",
+//           count: { $sum: 1 },
+//         },
+//       },
+//     ]);
+
+//     // Формування списків брендів і категорій
+//     const finalBrands = allBrands.map((brand) => ({
+//       idTorgsoft: brand.numberId,
+//       name: brand.name,
+//       count: brandCounts.find((b) => b._id === brand.numberId)?.count || 0,
+//     }));
+
+//     const finalCategories = allCategories.flatMap((category) => {
+//       const flattenCategory = (cat) => ({
+//         idTorgsoft: cat.idTorgsoft,
+//         name: cat.name,
+//         count: categoryCounts.find((c) => c._id === cat.idTorgsoft)?.count || 0,
+//       });
+
+//       const traverseCategories = (cat) => [
+//         flattenCategory(cat),
+//         ...(cat.children ? cat.children.flatMap(traverseCategories) : []),
+//       ];
+
+//       return traverseCategories(category);
+//     });
+
+//     res.json({ brandsCount: finalBrands, categoriesCount: finalCategories });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+/*  
 export const getCountByFilter = async (req, res) => {
   try {
-    // Агрегування по брендам
-    const brandsCount = await Goods.aggregate([
-      {
-        $group: {
-          _id: "$brand", // Групування за назвою бренду
-          count: { $sum: 1 }, // Рахуємо кількість товарів для кожного бренду
-        },
-      },
+    const { brands, categories } = req.query;
+
+    // Отримання всіх брендів і категорій
+    const allBrands = await BrandTorgsoft.find().lean();
+    const allCategories = await CategoryTorg.find().lean();
+
+    // Створюємо мапу для брендів
+    const brandMap = allBrands.reduce((acc, brand) => {
+      acc[brand.numberId] = brand.name;
+      return acc;
+    }, {});
+
+    // Перетворення brands на назви брендів
+    let brandNames = [];
+    if (brands) {
+      brandNames = brands.split(",").map((id) => brandMap[Number(id)]).filter(Boolean);
+    }
+
+    // --- Підрахунок товарів у брендах (ігноруючи фільтр по брендах) ---
+    const brandCounts = await Goods.aggregate([
       {
         $lookup: {
-          from: "brandtorgsofts", // Ім'я колекції з брендами
-          localField: "_id", // Поле у Goods (назва бренду)
-          foreignField: "name", // Поле у BrandTorgsoft (назва бренду)
-          as: "brandInfo", // Поле, в яке буде записано результат об'єднання
+          from: "brandtorgsofts",
+          localField: "brand",
+          foreignField: "name",
+          as: "brandInfo",
         },
       },
+      { $unwind: "$brandInfo" },
       {
-        $unwind: "$brandInfo", // Розгортаємо масив brandInfo у звичайний об'єкт
-      },
-      {
-        $project: {
-          _id: "$brandInfo._id", // Повертаємо унікальний `_id` з BrandTorgsoft
-          name: "$brandInfo.name", // Повертаємо назву бренду
-          numberId: "$brandInfo.numberId", // Повертаємо `numberId` бренду
-          count: 1, // Повертаємо кількість товарів
+        $group: {
+          _id: "$brandInfo.numberId",
+          count: { $sum: 1 },
         },
-      },
-      {
-        $sort: { name: 1 }, // Сортуємо бренди за назвою
       },
     ]);
 
-    // Агрегування по категоріям
-    const categoriesCount = await Goods.aggregate([
+    // --- Підрахунок товарів у категоріях з урахуванням фільтрів ---
+    const query = {};
+    if (brandNames.length) {
+      query.brand = { $in: brandNames };
+    }
+    if (categories) {
+      query["categories.idTorgsoft"] = { $in: categories.split(",").map(Number) };
+    }
+
+    const categoryCounts = await Goods.aggregate([
+      { $match: query },
       { $unwind: "$categories" },
-      { $group: { _id: "$categories.name", count: { $sum: 1 } } },
+      {
+        $group: {
+          _id: "$categories.idTorgsoft",
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
-    res.json({ brandsCount, categoriesCount });
+    // Формування списків брендів і категорій з урахуванням фільтрів
+    const finalBrands = allBrands.map((brand) => ({
+      idTorgsoft: brand.numberId,
+      name: brand.name,
+      count: brandCounts.find((b) => b._id === brand.numberId)?.count || 0,
+    }));
+
+    const finalCategories = allCategories.flatMap((category) => {
+      const flattenCategory = (cat) => ({
+        idTorgsoft: cat.idTorgsoft,
+        name: cat.name,
+        count: categoryCounts.find((c) => c._id === cat.idTorgsoft)?.count || 0,
+      });
+
+      const traverseCategories = (cat) => [
+        flattenCategory(cat),
+        ...(cat.children ? cat.children.flatMap(traverseCategories) : []),
+      ];
+
+      return traverseCategories(category);
+    });
+
+    res.json({ brandsCount: finalBrands, categoriesCount: finalCategories });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
+*/
+
+export const getCountByFilter = async (req, res) => {
+  try {
+    const { brands, categories, price } = req.query;
+
+    // Парсимо ціновий діапазон
+    let minPrice = null;
+    let maxPrice = null;
+    if (price) {
+      [minPrice, maxPrice] = price.split(",").map(Number);
+    }
+
+    // Отримання всіх брендів і категорій
+    const allBrands = await BrandTorgsoft.find().lean();
+    const allCategories = await CategoryTorg.find().lean();
+
+    // Створюємо мапу для брендів
+    const brandMap = allBrands.reduce((acc, brand) => {
+      acc[brand.numberId] = brand.name;
+      return acc;
+    }, {});
+
+    // Перетворення `brands` на назви брендів
+    let brandNames = [];
+    if (brands) {
+      brandNames = brands.split(",").map((id) => brandMap[Number(id)]).filter(Boolean);
+    }
+
+    // Функція для формування фільтра з ціною
+    const getPriceFilter = () => {
+      if (minPrice !== null || maxPrice !== null) {
+        const priceFilter = {};
+        if (minPrice !== null) priceFilter.$gte = minPrice;
+        if (maxPrice !== null) priceFilter.$lte = maxPrice;
+        return { "variations.retailPrice": priceFilter };
+      }
+      return {};
+    };
+
+    const priceFilter = getPriceFilter();
+
+    // --- Підрахунок товарів у категоріях ---
+    const categoryQuery = { ...priceFilter };
+    if (brandNames.length) {
+      categoryQuery.brand = { $in: brandNames };
+    }
+    if (categories) {
+      categoryQuery["categories.idTorgsoft"] = { $in: categories.split(",").map(Number) };
+    }
+
+    const categoryCounts = await Goods.aggregate([
+      { $match: categoryQuery },
+      { $unwind: "$categories" },
+      {
+        $group: {
+          _id: "$categories.idTorgsoft",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // --- Підрахунок товарів у брендах ---
+    const brandQuery = { ...priceFilter };
+    if (categories) {
+      brandQuery["categories.idTorgsoft"] = { $in: categories.split(",").map(Number) };
+    }
+
+    const brandCounts = await Goods.aggregate([
+      { $match: brandQuery },
+      {
+        $lookup: {
+          from: "brandtorgsofts",
+          localField: "brand",
+          foreignField: "name",
+          as: "brandInfo",
+        },
+      },
+      { $unwind: "$brandInfo" },
+      {
+        $group: {
+          _id: "$brandInfo.numberId",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // --- Формування результатів ---
+    const finalBrands = allBrands.map((brand) => ({
+      idTorgsoft: brand.numberId,
+      name: brand.name,
+      count: brandCounts.find((b) => b._id === brand.numberId)?.count || 0,
+    }));
+
+    const finalCategories = allCategories.flatMap((category) => {
+      const flattenCategory = (cat) => ({
+        idTorgsoft: cat.idTorgsoft,
+        name: cat.name,
+        count: categoryCounts.find((c) => c._id === cat.idTorgsoft)?.count || 0,
+      });
+
+      const traverseCategories = (cat) => [
+        flattenCategory(cat),
+        ...(cat.children ? cat.children.flatMap(traverseCategories) : []),
+      ];
+
+      return traverseCategories(category);
+    });
+
+    res.json({ brandsCount: finalBrands, categoriesCount: finalCategories });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+
+
+

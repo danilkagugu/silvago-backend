@@ -93,6 +93,7 @@ export async function parseGoodsFile() {
       modelName: row[15], // назва моделі
       modelId: row[42], // Id моделі
       measure: row[39],
+      randomOrderKey: Math.random()
     }));
 
     // console.log("Розпарсені товари:", products);
@@ -137,6 +138,7 @@ export async function saveProductsToDb(products) {
           categories: product.categories,
           measure: product.measure,
           variations: [],
+          randomOrderKey: product.randomOrderKey
           // skinNeeds: product.skinNeeds.trim() === "" ? null : product.skinNeeds,
         };
       }
