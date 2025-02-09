@@ -1043,12 +1043,58 @@ export const getCountByFilter = async (req, res) => {
     ]);
 
     // Агрегування по категоріям
-    const categoriesCount = await Goods.aggregate([
+    const categories = await CategoryTorg.find().lean();
+
+    // Функція для плоского перетворення категорій (включаючи всі вкладені)
+    const flattenCategories = (categories) => {
+      const result = [];
+
+      const traverse = (category, ) => {
+        result.push({
+          idTorgsoft: category.idTorgsoft,
+          name: category.name,
+          count: 0, // Початкове значення, оновиться після агрегації
+        });
+
+        if (category.children && category.children.length > 0) {
+          category.children.forEach((child) => traverse(child, category.idTorgsoft));
+        }
+      };
+
+      categories.forEach((category) => traverse(category));
+      return result;
+    };
+
+    // Формуємо плоский масив категорій
+    const flattenedCategories = flattenCategories(categories);
+
+    // Агрегація для підрахунку кількості товарів у категоріях
+    const categoriesCountData = await Goods.aggregate([
       { $unwind: "$categories" },
-      { $group: { _id: "$categories.name", count: { $sum: 1 } } },
+      {
+        $group: {
+          _id: "$categories.idTorgsoft",
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
-    res.json({ brandsCount, categoriesCount });
+    // Оновлюємо кількість товарів у відповідних категоріях
+    const categoryMap = flattenedCategories.reduce((acc, category) => {
+      acc[category.idTorgsoft] = category;
+      return acc;
+    }, {});
+
+    categoriesCountData.forEach((categoryData) => {
+      if (categoryMap[categoryData._id]) {
+        categoryMap[categoryData._id].count = categoryData.count;
+      }
+    });
+
+    // Формуємо остаточний результат
+    const finalCategoriesCount = Object.values(categoryMap);
+
+    res.json({ brandsCount, categoriesCount: finalCategoriesCount });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
