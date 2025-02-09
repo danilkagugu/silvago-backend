@@ -865,36 +865,43 @@ export const getFilteredProducts = async (req, res, next) => {
     let products = await Goods.find(query)
       .skip((page - 1) * limit)
       .limit(Number(limit))
-      .lean();
+      .lean()
+      .sort({ randomOrderKey: 1, })
+      // .sort({ brand: 1, modelName: 1 });
+      // products.sort((a, b) => a.modelName.localeCompare(b.modelName, "uk", { sensitivity: "base" }));
 
-    const filteredProducts = products
-      .map((product) => {
-        const filteredVariations = price
-          ? product.variations.filter(
-              (variant) =>
-                variant.retailPrice >= minPrice &&
-                variant.retailPrice <= maxPrice
-            )
-          : product.variations;
-
-        // Повертаємо всі варіації, але з активною варіацією для фільтрації за ціною
+      const filteredProducts = products.map((product) => {
+        let filteredVariations = product.variations;
+        
+        // Фільтруємо варіації за ціною, якщо заданий фільтр
+        if (price) {
+          filteredVariations = product.variations.filter(
+            (variant) =>
+              variant.retailPrice >= minPrice &&
+              variant.retailPrice <= maxPrice
+          );
+        }
+  
+        // Обираємо активну варіацію: спочатку з isDefault, якщо її немає — першу зі списку
+        const activeVariation =
+          filteredVariations.find((v) => v.isDefault) ||
+          filteredVariations[0] ||
+          product.variations[0];
+  
         return {
-          ...product._doc,
-          variations: product.variations, // Показуємо всі варіації
-          activeVariation:
-            filteredVariations.find((v) => v.isDefault) ||
-            filteredVariations[0] ||
-            product.variations[0],
+          ...product,
+          variations: product.variations, // Виводимо всі варіації
+          activeVariation,
         };
-      })
-      .filter((product) => product.activeVariation !== null);
+      });
+  
 
     // Підрахунок загальної кількості товарів для пагінації
     const totalProducts = await Goods.countDocuments(query);
 
     // Відправка відповіді
     res.json({
-      products: products,
+      products: filteredProducts,
       currentPage: Number(page),
       totalPages: Math.ceil(totalProducts / limit),
       totalProducts,
@@ -1191,7 +1198,14 @@ export const getCountByFilter = async (req, res) => {
 
 export const getCountByFilter = async (req, res) => {
   try {
-    const { brands, categories } = req.query;
+    const { brands, categories, price } = req.query;
+
+    // Парсимо ціновий діапазон
+    let minPrice = null;
+    let maxPrice = null;
+    if (price) {
+      [minPrice, maxPrice] = price.split(",").map(Number);
+    }
 
     // Отримання всіх брендів і категорій
     const allBrands = await BrandTorgsoft.find().lean();
@@ -1209,8 +1223,21 @@ export const getCountByFilter = async (req, res) => {
       brandNames = brands.split(",").map((id) => brandMap[Number(id)]).filter(Boolean);
     }
 
-    // --- Підрахунок товарів у категоріях (з урахуванням фільтру по брендах) ---
-    const categoryQuery = {};
+    // Функція для формування фільтра з ціною
+    const getPriceFilter = () => {
+      if (minPrice !== null || maxPrice !== null) {
+        const priceFilter = {};
+        if (minPrice !== null) priceFilter.$gte = minPrice;
+        if (maxPrice !== null) priceFilter.$lte = maxPrice;
+        return { "variations.retailPrice": priceFilter };
+      }
+      return {};
+    };
+
+    const priceFilter = getPriceFilter();
+
+    // --- Підрахунок товарів у категоріях ---
+    const categoryQuery = { ...priceFilter };
     if (brandNames.length) {
       categoryQuery.brand = { $in: brandNames };
     }
@@ -1229,8 +1256,8 @@ export const getCountByFilter = async (req, res) => {
       },
     ]);
 
-    // --- Підрахунок товарів у брендах (з урахуванням фільтру по категоріях) ---
-    const brandQuery = {};
+    // --- Підрахунок товарів у брендах ---
+    const brandQuery = { ...priceFilter };
     if (categories) {
       brandQuery["categories.idTorgsoft"] = { $in: categories.split(",").map(Number) };
     }
@@ -1282,6 +1309,9 @@ export const getCountByFilter = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+
 
 
 

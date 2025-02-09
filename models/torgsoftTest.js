@@ -32,6 +32,7 @@ const productSchema = new Schema({
   ], // Категорії
   variations: [variationSchema], // Варіації товару (об'єми/тони)
   skinNeeds: { type: String, required: false },
+  randomOrderKey: {type: Number,required: true}
 });
 const Goods = model("goods", productSchema);
 
