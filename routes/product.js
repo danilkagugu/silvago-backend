@@ -31,6 +31,7 @@ import {
   searchProducts,
   sendOrder,
   sendPhoto,
+  testCatalogFilter,
   updateProductQuantity,
 } from "../conrollers/product.js";
 import authMiddlewares from "../middlewares/authMiddlewares.js";
@@ -47,7 +48,23 @@ productRouter.get("/sync", getBd);
 productRouter.get("/get/goods", getGoods);
 productRouter.post("/get-variation", changeProductVariation);
 productRouter.get("/get-default-variation", getDefaultVariations);
-productRouter.get("/getcatalog/*", parseFiltersMiddleware, getFilteredProducts);
+productRouter.get("/catalog", parseFiltersMiddleware, getFilteredProducts);
+productRouter.get(
+  "/catalog/filter/*",
+  parseFiltersMiddleware,
+  getFilteredProducts
+);
+productRouter.get(
+  "/catalog/category/:categorySlug",
+  parseFiltersMiddleware,
+  testCatalogFilter
+);
+
+// productRouter.get(
+//   "/:categorySlug/*",
+//   parseFiltersMiddleware,
+//   getFilteredProducts
+// );
 
 productRouter.get("/get/brand", getBrandsTorgsoft);
 productRouter.get("/price-range", getPriceRange);
