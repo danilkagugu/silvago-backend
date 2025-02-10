@@ -57,7 +57,12 @@ productRouter.get(
 productRouter.get(
   "/catalog/category/:categorySlug",
   parseFiltersMiddleware,
-  testCatalogFilter
+  getFilteredProducts
+);
+productRouter.get(
+  "/catalog/category/:categorySlug/filter/*",
+  parseFiltersMiddleware,
+  getFilteredProducts
 );
 
 // productRouter.get(
