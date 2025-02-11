@@ -31,7 +31,6 @@ import {
   searchProducts,
   sendOrder,
   sendPhoto,
-  testCatalogFilter,
   updateProductQuantity,
 } from "../conrollers/product.js";
 import authMiddlewares from "../middlewares/authMiddlewares.js";
@@ -64,12 +63,6 @@ productRouter.get(
   parseFiltersMiddleware,
   getFilteredProducts
 );
-
-// productRouter.get(
-//   "/:categorySlug/*",
-//   parseFiltersMiddleware,
-//   getFilteredProducts
-// );
 
 productRouter.get("/get/brand", getBrandsTorgsoft);
 productRouter.get("/price-range", getPriceRange);
