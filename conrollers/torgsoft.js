@@ -93,7 +93,7 @@ export async function parseGoodsFile() {
       modelName: row[15], // назва моделі
       modelId: row[42], // Id моделі
       measure: row[39],
-      randomOrderKey: Math.random()
+      randomOrderKey: Math.random(),
     }));
 
     // console.log("Розпарсені товари:", products);
@@ -138,7 +138,7 @@ export async function saveProductsToDb(products) {
           categories: product.categories,
           measure: product.measure,
           variations: [],
-          randomOrderKey: product.randomOrderKey
+          randomOrderKey: product.randomOrderKey,
           // skinNeeds: product.skinNeeds.trim() === "" ? null : product.skinNeeds,
         };
       }
@@ -163,7 +163,12 @@ export async function saveProductsToDb(products) {
           slug: `${slugify(product.modelName, {
             lower: true,
             strict: true,
-          })}${product.tone ? `-${product.tone}` : ""}-${product.volume.trim()}${slugify(product.measure.trim(), { lower: true, strict: true })}`,
+          })}${
+            product.tone ? `-${product.tone}` : ""
+          }-${product.volume.trim()}${slugify(product.measure.trim(), {
+            lower: true,
+            strict: true,
+          })}`,
           isDefault: false,
         });
       }
@@ -379,7 +384,8 @@ async function syncBrands(products) {
   }
 }
 
-export function generateBreadcrumbs(categories, product, volume) {
+export async function generateBreadcrumbs(categories, product, volume) {
+  console.log("product: ", product);
   const breadcrumbs = [{ name: "Silvago", slug: "/" }];
 
   // Додаємо "Каталог" до хлібних крихт
@@ -390,26 +396,35 @@ export function generateBreadcrumbs(categories, product, volume) {
     (a, b) => a.idTorgsoft - b.idTorgsoft
   );
 
-  // Формуємо хлібні крихти на основі готових slug
-  let slugPath = "/catalog";
+  let lastCategorySlug = "/catalog";
+
+  // Додаємо всі категорії у breadcrumbs
   sortedCategories.forEach((category) => {
-    slugPath = `${slugPath}/${category.slug}`;
+    lastCategorySlug = `/catalog/category/${category.slug}`;
     breadcrumbs.push({
       name: category.name,
-      slug: slugPath,
+      slug: lastCategorySlug,
     });
   });
 
-  // Додаємо бренд до останньої категорії
+  // Отримуємо ID бренду по назві (запит у БД)
+  let brandId = null;
   if (product.brand) {
-    const brandSlug = `${slugPath}-${product.brand
-      .toLowerCase()
-      .replace(/\s/g, "-")}`;
+    const brandData = await BrandTorgsoft.findOne({
+      name: product.brand,
+    }).lean();
+    if (brandData) {
+      brandId = brandData.numberId; // Припускаємо, що поле ID бренду - це `numberId`
+    }
+  }
+
+  // Якщо є бренд та ID бренду, додаємо його як окремий елемент
+  if (product.brand && brandId) {
     breadcrumbs.push({
       name: `${sortedCategories[sortedCategories.length - 1].name} ${
         product.brand
       }`,
-      slug: brandSlug,
+      slug: `${lastCategorySlug}/filter/brands=${brandId}`,
     });
   }
 

@@ -992,7 +992,7 @@ export const getProductByIdTest = async (req, res, next) => {
   try {
     // Знаходимо продукт за slug варіації
     const product = await Goods.findOne({ "variations.slug": slug });
-    console.log("product: ", product);
+    // console.log("product: ", product);
 
     if (!product) {
       return res.status(404).send("Product not found");
@@ -1004,9 +1004,8 @@ export const getProductByIdTest = async (req, res, next) => {
     if (!volume) {
       return res.status(404).send("Volume not found");
     }
-    console.log("product.categories", product.categories);
     // Генеруємо хлібні крихти
-    const breadcrumbs = generateBreadcrumbs(
+    const breadcrumbs = await generateBreadcrumbs(
       product.categories,
       product,
       volume
