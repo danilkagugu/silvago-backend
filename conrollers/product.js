@@ -591,25 +591,34 @@ export const getCategory = async (req, res, next) => {
   }
 };
 
-export const searchProducts = async (req, res, next) => {
+export const searchProducts = async (req, res) => {
   try {
     const { query } = req.query;
 
-    // Перевірка, чи є запит
     if (!query) {
-      return res.status(400).json({ message: "Запит не може бути порожнім" });
+      return res.status(400).json({ message: "Потрібно вказати запит" });
     }
 
-    // Пошук продуктів за допомогою регулярного виразу
-    const products = await Goods.find({
+    // Регулярний вираз для пошуку (нечутливий до регістру)
+    const searchRegex = new RegExp(query, "i");
+
+    // Фільтр для пошуку по різних полях
+    const searchFilter = {
       $or: [
-        { name: { $regex: query, $options: "i" } }, // Пошук за назвою продукту
+        { modelName: searchRegex }, // Пошук по modelName
+        { brand: searchRegex }, // Пошук по бренду
+        { "categories.name": searchRegex }, // Пошук по категоріях
+        { "variations.fullName": searchRegex }, // Пошук по повній назві варіації
+        { "variations.barcode": { $regex: query, $options: "i" } }, // ✅ Частковий пошук по штрихкоду
       ],
-    });
+    };
+
+    const products = await Goods.find(searchFilter).limit(20);
 
     res.json(products);
   } catch (error) {
-    next(error);
+    console.error("Помилка при пошуку товарів:", error);
+    res.status(500).json({ message: "Помилка сервера" });
   }
 };
 
@@ -691,11 +700,13 @@ export const getBrandsTorgsoft = async (req, res, next) => {
 export const getFilteredProducts = async (req, res, next) => {
   try {
     const { categorySlug } = req.params;
-    const { category, brand, price, page = 1, limit = 20 } = req.query;
+    const { category, brand, price, query, page = 1, limit = 20 } = req.query;
+    console.log("😍😍😍: ", query);
 
-    const query = {};
+    const searchQuery = {}; // Основний об'єкт фільтрації
     let categoryIds = category ? category.split(",").map(Number) : [];
 
+    // --- Знаходимо категорію за `slug` ---
     const findCategoryBySlug = (cat, slug) => {
       if (cat.slug === slug) return cat;
       for (const child of cat.children || []) {
@@ -719,19 +730,17 @@ export const getFilteredProducts = async (req, res, next) => {
       }
 
       const exactCategory = findCategoryBySlug(category, categorySlug);
-
       if (!exactCategory) {
         return res.status(404).json({ message: "Підкатегорію не знайдено" });
       }
 
-      // Додаємо лише точну категорію, якщо немає параметра `category`
       if (!categoryIds.length) {
         categoryIds.push(exactCategory.idTorgsoft);
       }
     }
 
     if (categoryIds.length > 0) {
-      query["categories.idTorgsoft"] = { $in: categoryIds };
+      searchQuery["categories.idTorgsoft"] = { $in: categoryIds };
     }
 
     // --- Фільтрація за брендом ---
@@ -749,24 +758,40 @@ export const getFilteredProducts = async (req, res, next) => {
         });
       }
 
-      query["brand"] = { $in: brandNames };
+      searchQuery["brand"] = { $in: brandNames };
     }
 
     // --- Фільтрація за ціною ---
     let minPrice, maxPrice;
     if (price) {
       [minPrice, maxPrice] = price.split(",").map(Number);
-      query["variations.retailPrice"] = {};
-      if (!isNaN(minPrice)) query["variations.retailPrice"].$gte = minPrice;
-      if (!isNaN(maxPrice)) query["variations.retailPrice"].$lte = maxPrice;
+      searchQuery["variations.retailPrice"] = {};
+      if (!isNaN(minPrice))
+        searchQuery["variations.retailPrice"].$gte = minPrice;
+      if (!isNaN(maxPrice))
+        searchQuery["variations.retailPrice"].$lte = maxPrice;
     }
 
+    // --- Фільтрація за `query` (пошук товарів) ---
+    if (query) {
+      const searchRegex = new RegExp(query, "i");
+
+      searchQuery.$or = [
+        { modelName: searchRegex }, // Пошук за `modelName`
+        { brand: searchRegex }, // Пошук за брендом
+        { "categories.name": searchRegex }, // Пошук у категоріях
+        { "variations.fullName": searchRegex }, // Пошук у варіаціях
+        { "variations.barcode": { $regex: query, $options: "i" } }, // Пошук за `barcode`
+      ];
+    }
+
+    // --- Отримання мінімальної та максимальної ціни ---
     let minRetailPrice = 0;
     let maxRetailPrice = 0;
 
     const minPriceResult = await Goods.aggregate([
       { $unwind: "$variations" },
-      { $match: query },
+      { $match: searchQuery },
       { $sort: { "variations.retailPrice": 1 } },
       { $limit: 1 },
       { $project: { _id: 0, retailPrice: "$variations.retailPrice" } },
@@ -774,7 +799,7 @@ export const getFilteredProducts = async (req, res, next) => {
 
     const maxPriceResult = await Goods.aggregate([
       { $unwind: "$variations" },
-      { $match: query },
+      { $match: searchQuery },
       { $sort: { "variations.retailPrice": -1 } },
       { $limit: 1 },
       { $project: { _id: 0, retailPrice: "$variations.retailPrice" } },
@@ -784,7 +809,7 @@ export const getFilteredProducts = async (req, res, next) => {
     maxRetailPrice = maxPriceResult[0]?.retailPrice || 0;
 
     // --- Отримання товарів ---
-    let products = await Goods.find(query)
+    let products = await Goods.find(searchQuery)
       .skip((page - 1) * limit)
       .limit(Number(limit))
       .lean()
@@ -812,8 +837,8 @@ export const getFilteredProducts = async (req, res, next) => {
       };
     });
 
-    const totalProducts = await Goods.countDocuments(query);
-
+    const totalProducts = await Goods.countDocuments(searchQuery);
+    // console.log("filteredProducts👌👌👌", filteredProducts);
     res.json({
       products: filteredProducts,
       currentPage: Number(page),

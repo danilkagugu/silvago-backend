@@ -63,6 +63,16 @@ productRouter.get(
   parseFiltersMiddleware,
   getFilteredProducts
 );
+productRouter.get(
+  "/catalog/search",
+  parseFiltersMiddleware,
+  getFilteredProducts
+);
+productRouter.get(
+  "/catalog/search/filter/*",
+  parseFiltersMiddleware,
+  getFilteredProducts
+);
 
 productRouter.get("/get/brand", getBrandsTorgsoft);
 productRouter.get("/price-range", getPriceRange);
