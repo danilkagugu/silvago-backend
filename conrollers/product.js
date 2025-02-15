@@ -591,25 +591,34 @@ export const getCategory = async (req, res, next) => {
   }
 };
 
-export const searchProducts = async (req, res, next) => {
+export const searchProducts = async (req, res) => {
   try {
     const { query } = req.query;
 
-    // Перевірка, чи є запит
     if (!query) {
-      return res.status(400).json({ message: "Запит не може бути порожнім" });
+      return res.status(400).json({ message: "Потрібно вказати запит" });
     }
 
-    // Пошук продуктів за допомогою регулярного виразу
-    const products = await Goods.find({
+    // Регулярний вираз для пошуку (нечутливий до регістру)
+    const searchRegex = new RegExp(query, "i");
+
+    // Фільтр для пошуку по різних полях
+    const searchFilter = {
       $or: [
-        { name: { $regex: query, $options: "i" } }, // Пошук за назвою продукту
+        { modelName: searchRegex }, // Пошук по modelName
+        { brand: searchRegex }, // Пошук по бренду
+        { "categories.name": searchRegex }, // Пошук по категоріях
+        { "variations.fullName": searchRegex }, // Пошук по повній назві варіації
+        { "variations.barcode": { $regex: query, $options: "i" } }, // ✅ Частковий пошук по штрихкоду
       ],
-    });
+    };
+
+    const products = await Goods.find(searchFilter).limit(20);
 
     res.json(products);
   } catch (error) {
-    next(error);
+    console.error("Помилка при пошуку товарів:", error);
+    res.status(500).json({ message: "Помилка сервера" });
   }
 };
 
