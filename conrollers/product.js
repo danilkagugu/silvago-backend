@@ -955,7 +955,8 @@ export const getProductByIdTest = async (req, res, next) => {
 
 export const getCountByFilter = async (req, res) => {
   try {
-    const { brands, categories, price, categorySlug } = req.query;
+    const { brands, categories, price, categorySlug, query } = req.query;
+    console.log("query: ", query);
 
     let categoryIds = [];
     let categoriesToDisplay = [];
@@ -1097,6 +1098,16 @@ export const getCountByFilter = async (req, res) => {
       };
     }
 
+    if (query) {
+      brandQuerys["$or"] = [
+        { fullName: { $regex: query, $options: "i" } },
+        { brand: { $regex: query, $options: "i" } },
+        { "categories.name": { $regex: query, $options: "i" } },
+        { "variations.fullName": { $regex: query, $options: "i" } },
+        { "variations.barcode": query.toString() },
+      ];
+    }
+
     const brandCounts = await Goods.aggregate([
       { $match: brandQuerys },
       {
@@ -1123,7 +1134,7 @@ export const getCountByFilter = async (req, res) => {
       count: brandCounts.find((b) => b._id === brand.numberId)?.count || 0,
     }));
 
-    if (categorySlug) {
+    if (categorySlug || query) {
       finalBrands = finalBrands.filter((brand) => brand.count > 0);
     }
 
