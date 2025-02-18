@@ -430,15 +430,57 @@ export const addProductToBasket = async (req, res, next) => {
   }
 };
 
+export const getCart = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    // console.log("userId😊😊😊: ", userId);
+
+    // Отримуємо кошик користувача та заповнюємо продукти
+    const cart = await Cart.findOne({ userId, status: "active" }).populate({
+      path: "items.productId",
+      model: "goods",
+    });
+
+    if (!cart) {
+      return res.status(404).json({ message: "Кошик порожній" });
+    }
+
+    // Формуємо дані з товарами та варіаціями
+    const cartItems = cart.items.map((item) => {
+      const product = item.productId;
+      if (!product) return null;
+
+      // Знаходимо відповідну варіацію за idTorgsoft
+      const selectedVariation = product.variations.find(
+        (v) => v.idTorgsoft === item.idTorgsoft
+      );
+
+      return {
+        productId: product._id,
+        modelName: product.modelName,
+        brand: product.brand,
+        categories: product.categories,
+        measure: product.measure,
+        selectedVariation,
+        quantity: item.quantity, // Кількість в кошику
+      };
+    });
+    console.log("cartItems", cartItems);
+    res.status(200).json(cartItems.filter((item) => item !== null));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const addToCart = async (req, res, next) => {
   try {
     const { userId, productId, idTorgsoft, quantity } = req.body;
-    console.log("userId: ", userId);
 
     // Переконуємося, що кількість не менше 1
     const qty = Math.max(Number(quantity), 1);
 
     let cart = await Cart.findOne({ userId, status: "active" });
+
     const product = await Goods.findById(productId);
     if (!product) {
       return res.status(404).json({ message: "Товар не знайдено" });
@@ -446,37 +488,114 @@ export const addToCart = async (req, res, next) => {
 
     // Знаходимо відповідну варіацію
     const variation = product.variations.find(
-      (variant) => variant.idTorgsoft === idTorgsoft
+      (variant) => Number(variant.idTorgsoft) === Number(idTorgsoft)
     );
-    console.log("variation", variation);
     if (!variation) {
       return res.status(400).json({ message: "Варіація товару не знайдена" });
     }
+
     const slug = variation.slug || "";
+
     // Якщо у користувача ще немає активного кошика – створюємо його
     if (!cart) {
       cart = new Cart({ userId, items: [] });
     }
 
     // Шукаємо товар у кошику
-    const existingItem = cart.items.find(
+    const existingItemIndex = cart.items.findIndex(
       (item) =>
         item.productId.toString() === productId.toString() &&
-        item.idTorgsoft === idTorgsoft
+        Number(item.idTorgsoft) === Number(idTorgsoft)
     );
 
-    if (existingItem) {
-      existingItem.quantity += qty; // Додаємо кількість до існуючого товару
+    if (existingItemIndex !== -1) {
+      cart.items[existingItemIndex].quantity += qty;
     } else {
-      cart.items.push({ productId, idTorgsoft, slug, quantity: qty }); // Додаємо новий товар
+      cart.items.push({ productId, idTorgsoft, slug, quantity: qty });
     }
 
-    await cart.save();
-    res.status(200).json(cart);
+    // Оновлюємо кошик і повертаємо оновлені дані відразу
+    const updatedCart = await Cart.findByIdAndUpdate(
+      cart._id,
+      { items: cart.items }, // Оновлюємо `items`
+      { new: true } // Повертає оновлену версію кошика
+    ).populate({
+      path: "items.productId",
+      model: "goods",
+    });
+
+    const cartItems = updatedCart.items.map((item) => {
+      const product = item.productId;
+      if (!product) return null;
+
+      const selectedVariation = product.variations.find(
+        (v) => Number(v.idTorgsoft) === Number(item.idTorgsoft)
+      );
+
+      return {
+        productId: product._id,
+        modelName: product.modelName,
+        brand: product.brand,
+        categories: product.categories,
+        measure: product.measure,
+        selectedVariation,
+        quantity: item.quantity,
+      };
+    });
+
+    res.status(200).json(cartItems.filter((item) => item !== null));
   } catch (error) {
     next(error);
   }
 };
+
+// export const addToCart = async (req, res, next) => {
+//   try {
+//     const { userId, productId, idTorgsoft, quantity } = req.body;
+//     console.log("userId: ", userId);
+
+//     // Переконуємося, що кількість не менше 1
+//     const qty = Math.max(Number(quantity), 1);
+
+//     let cart = await Cart.findOne({ userId, status: "active" });
+//     const product = await Goods.findById(productId);
+//     if (!product) {
+//       return res.status(404).json({ message: "Товар не знайдено" });
+//     }
+
+//     // Знаходимо відповідну варіацію
+//     const variation = product.variations.find(
+//       (variant) => variant.idTorgsoft === idTorgsoft
+//     );
+//     console.log("variation", variation);
+//     if (!variation) {
+//       return res.status(400).json({ message: "Варіація товару не знайдена" });
+//     }
+//     const slug = variation.slug || "";
+//     // Якщо у користувача ще немає активного кошика – створюємо його
+//     if (!cart) {
+//       cart = new Cart({ userId, items: [] });
+//     }
+
+//     // Шукаємо товар у кошику
+//     const existingItem = cart.items.find(
+//       (item) =>
+//         item.productId.toString() === productId.toString() &&
+//         item.idTorgsoft === idTorgsoft
+//     );
+
+//     if (existingItem) {
+//       existingItem.quantity += qty; // Додаємо кількість до існуючого товару
+//     } else {
+//       cart.items.push({ productId, idTorgsoft, slug, quantity: qty }); // Додаємо новий товар
+//     }
+
+//     await cart.save();
+//     res.status(200).json(cart);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 export const removeFromCart = async (req, res, next) => {
   try {
@@ -539,48 +658,6 @@ export const getBasket = async (req, res, next) => {
       return res.status(404).json({ message: "Basket not found" });
     }
     res.json(basket);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getCart = async (req, res, next) => {
-  try {
-    const { userId } = req.params;
-    // console.log("userId😊😊😊: ", userId);
-
-    // Отримуємо кошик користувача та заповнюємо продукти
-    const cart = await Cart.findOne({ userId, status: "active" }).populate({
-      path: "items.productId",
-      model: "goods",
-    });
-
-    if (!cart) {
-      return res.status(404).json({ message: "Кошик порожній" });
-    }
-
-    // Формуємо дані з товарами та варіаціями
-    const cartItems = cart.items.map((item) => {
-      const product = item.productId;
-      if (!product) return null;
-
-      // Знаходимо відповідну варіацію за idTorgsoft
-      const selectedVariation = product.variations.find(
-        (v) => v.idTorgsoft === item.idTorgsoft
-      );
-
-      return {
-        productId: product._id,
-        modelName: product.modelName,
-        brand: product.brand,
-        categories: product.categories,
-        measure: product.measure,
-        selectedVariation,
-        quantity: item.quantity, // Кількість в кошику
-      };
-    });
-
-    res.status(200).json(cartItems.filter((item) => item !== null));
   } catch (error) {
     next(error);
   }
