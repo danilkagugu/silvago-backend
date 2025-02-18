@@ -16,6 +16,7 @@ import CategoryTorg from "../models/categoryTorgsoft.js";
 import { uploadOrderToFTP } from "../uploadOrderToTorgsoft.js";
 import Client from "../models/userTorgsoft.js";
 import { generateBreadcrumbs } from "./torgsoft.js";
+import Cart from "../models/cartSchema.js";
 
 export const createProduct = async (req, res, next) => {
   try {
@@ -143,24 +144,21 @@ export const getFavorites = async (req, res, next) => {
   try {
     const { userId } = req.params;
 
-    // Знайти користувача та заповнити favorites
     const user = await Client.findById(userId).populate({
-      path: "favorites.productId", // Заповнюємо поле productId
-      model: "goods", // Зв'язок із колекцією goods
+      path: "favorites.productId",
+      model: "goods",
     });
 
     if (!user) {
       return res.status(404).json({ message: "Користувача не знайдено" });
     }
 
-    // Зібрати повну інформацію про кожен товар
-    const favoritesWithDetails = user.favorites.map((favorite) => {
-      const product = favorite.productId; // Товар із заповненого productId
-      if (!product) return null; // Пропускаємо, якщо товар не знайдено
-      // console.log("product", product);
-      // Знаходимо потрібну варіацію за idTorgsoft
-      const variation = product.variations.find(
-        (variant) => variant.idTorgsoft === favorite.idTorgsoft
+    const favoritesList = user.favorites.map((favorite) => {
+      const product = favorite.productId;
+      if (!product) return null;
+
+      const selectedVariation = product.variations.find(
+        (v) => v.idTorgsoft === favorite.idTorgsoft
       );
 
       return {
@@ -169,11 +167,94 @@ export const getFavorites = async (req, res, next) => {
         brand: product.brand,
         country: product.country,
         categories: product.categories,
-        variation, // Додаємо обрану варіацію
+        measure: product.measure,
+        selectedVariation,
+        // allVariations: product.variations.map((v) => ({
+        //   idTorgsoft: v.idTorgsoft,
+        //   volume: v.volume,
+        //   tone: v.tone,
+        //   price: v.retailPrice,
+        //   discountPrice: v.discountPrice,
+        //   discount: v.discount,
+        //   image: v.image,
+        //   slug: v.slug,
+        //   quantity: v.quantity,
+        // })),
+        allVariations: product.variations.map((v) => ({
+          ...v.toObject(), // ✅ Передаємо повний об'єкт варіації
+        })),
       };
     });
 
-    res.status(200).json(favoritesWithDetails.filter((item) => item !== null)); // Видаляємо null-значення
+    res.status(200).json(favoritesList.filter((item) => item !== null));
+  } catch (error) {
+    next(error);
+  }
+};
+
+// export const getFavorites = async (req, res, next) => {
+//   try {
+//     const { userId } = req.params;
+
+//     // Знайти користувача та заповнити favorites
+//     const user = await Client.findById(userId).populate({
+//       path: "favorites.productId", // Заповнюємо поле productId
+//       model: "goods", // Зв'язок із колекцією goods
+//     });
+
+//     if (!user) {
+//       return res.status(404).json({ message: "Користувача не знайдено" });
+//     }
+
+//     // Зібрати повну інформацію про кожен товар
+//     const favoritesWithDetails = user.favorites.map((favorite) => {
+//       const product = favorite.productId; // Товар із заповненого productId
+//       if (!product) return null; // Пропускаємо, якщо товар не знайдено
+//       // console.log("product", product);
+//       // Знаходимо потрібну варіацію за idTorgsoft
+//       const variation = product.variations.find(
+//         (variant) => variant.idTorgsoft === favorite.idTorgsoft
+//       );
+
+//       return {
+//         productId: product._id,
+//         modelName: product.modelName,
+//         brand: product.brand,
+//         country: product.country,
+//         categories: product.categories,
+//         variation, // Додаємо обрану варіацію
+//       };
+//     });
+
+//     res.status(200).json(favoritesWithDetails.filter((item) => item !== null)); // Видаляємо null-значення
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+export const toogleFavorite = async (req, res, next) => {
+  try {
+    const { userId, productId, idTorgsoft } = req.body;
+    console.log("req.body: ", req.body);
+    const user = await Client.findById(userId);
+    // console.log("user: ", user);
+    if (!user)
+      return res.status(404).json({ message: "Користувач не знайдений" });
+
+    const index = user.favorites.findIndex(
+      (fav) =>
+        fav.productId.toString() === productId.toString() &&
+        Number(fav.idTorgsoft) === Number(idTorgsoft) // Використовуємо Number() для чисел
+    );
+    console.log("index", index);
+    if (index !== -1) {
+      user.favorites.splice(index, 1); // Видаляємо
+    } else {
+      user.favorites.push({ productId, idTorgsoft }); // Додаємо
+    }
+
+    await user.save();
+    res.json(user.favorites);
   } catch (error) {
     next(error);
   }
@@ -349,18 +430,94 @@ export const addProductToBasket = async (req, res, next) => {
   }
 };
 
+export const addToCart = async (req, res, next) => {
+  try {
+    const { userId, productId, idTorgsoft, quantity } = req.body;
+    console.log("userId: ", userId);
+
+    // Переконуємося, що кількість не менше 1
+    const qty = Math.max(Number(quantity), 1);
+
+    let cart = await Cart.findOne({ userId, status: "active" });
+    const product = await Goods.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Товар не знайдено" });
+    }
+
+    // Знаходимо відповідну варіацію
+    const variation = product.variations.find(
+      (variant) => variant.idTorgsoft === idTorgsoft
+    );
+    console.log("variation", variation);
+    if (!variation) {
+      return res.status(400).json({ message: "Варіація товару не знайдена" });
+    }
+    const slug = variation.slug || "";
+    // Якщо у користувача ще немає активного кошика – створюємо його
+    if (!cart) {
+      cart = new Cart({ userId, items: [] });
+    }
+
+    // Шукаємо товар у кошику
+    const existingItem = cart.items.find(
+      (item) =>
+        item.productId.toString() === productId.toString() &&
+        item.idTorgsoft === idTorgsoft
+    );
+
+    if (existingItem) {
+      existingItem.quantity += qty; // Додаємо кількість до існуючого товару
+    } else {
+      cart.items.push({ productId, idTorgsoft, slug, quantity: qty }); // Додаємо новий товар
+    }
+
+    await cart.save();
+    res.status(200).json(cart);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const removeFromCart = async (req, res, next) => {
+  try {
+    const { userId, productId, idTorgsoft } = req.body;
+    console.log("req.body: ", req.body);
+    console.log("userId: ", userId);
+
+    let cart = await Cart.findOne({ userId, status: "active" });
+    console.log("cart: ", cart);
+
+    if (!cart) {
+      return res.status(404).json({ message: "Кошик порожній" });
+    }
+
+    // Видаляємо конкретну варіацію товару
+    cart.items = cart.items.filter(
+      (item) =>
+        !(
+          item.productId.toString() === productId.toString() &&
+          item.idTorgsoft === idTorgsoft
+        )
+    );
+
+    // Якщо кошик став порожнім, можна його очистити або залишити пустим
+    if (cart.items.length === 0) {
+      await Cart.findByIdAndDelete(cart._id); // Видаляємо кошик повністю
+      return res.status(200).json({ message: "Кошик порожній" });
+    }
+
+    await cart.save();
+    res.status(200).json(cart);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteProductFromBasket = async (req, res, next) => {
   try {
     const { productId, volume } = req.body;
-    // console.log("volume: ", volume);
-    // console.log("productId: ", productId);
-    // console.log("slug: ", slug);
-    // console.log("volume: ", volume);
-    // console.log("productId: ", productId);
-    // console.log("req.body: ", req.body);
 
     const basket = await Basket.findOne({ owner: req.user.id });
-    // console.log("basket: ", basket);
     basket.products = basket.products.filter(
       (item) => !(item._id.toString() === productId && item.volume === volume)
     );
@@ -382,6 +539,48 @@ export const getBasket = async (req, res, next) => {
       return res.status(404).json({ message: "Basket not found" });
     }
     res.json(basket);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCart = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    // console.log("userId😊😊😊: ", userId);
+
+    // Отримуємо кошик користувача та заповнюємо продукти
+    const cart = await Cart.findOne({ userId, status: "active" }).populate({
+      path: "items.productId",
+      model: "goods",
+    });
+
+    if (!cart) {
+      return res.status(404).json({ message: "Кошик порожній" });
+    }
+
+    // Формуємо дані з товарами та варіаціями
+    const cartItems = cart.items.map((item) => {
+      const product = item.productId;
+      if (!product) return null;
+
+      // Знаходимо відповідну варіацію за idTorgsoft
+      const selectedVariation = product.variations.find(
+        (v) => v.idTorgsoft === item.idTorgsoft
+      );
+
+      return {
+        productId: product._id,
+        modelName: product.modelName,
+        brand: product.brand,
+        categories: product.categories,
+        measure: product.measure,
+        selectedVariation,
+        quantity: item.quantity, // Кількість в кошику
+      };
+    });
+
+    res.status(200).json(cartItems.filter((item) => item !== null));
   } catch (error) {
     next(error);
   }

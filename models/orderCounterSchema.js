@@ -1,10 +1,8 @@
-import { model, Schema } from "mongoose";
+import { Schema, model } from "mongoose";
 
-// Модель для зберігання кількості замовлень
 const orderCounterSchema = new Schema({
-  count: { type: Number, default: 0 },
+  orderNumber: { type: Number, required: true, default: 0 },
 });
 
-const OrderCounter = model("OrderCounter", orderCounterSchema);
-
+const OrderCounter = model("orderCounter", orderCounterSchema);
 export default OrderCounter;
