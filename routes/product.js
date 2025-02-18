@@ -6,12 +6,14 @@ import {
   addFavorite,
   addFavoriteProduct,
   addProductToBasket,
+  addToCart,
   changeProductVariation,
   createProduct,
   deleteFavoriteProduct,
   deleteProductFromBasket,
   getBasket,
   getBrandsTorgsoft,
+  getCart,
   getCategory,
   getCountByFilter,
   getDefaultVariations,
@@ -28,9 +30,11 @@ import {
   getProducts,
   getTopSellingProducts,
   removeFavorite,
+  removeFromCart,
   searchProducts,
   sendOrder,
   sendPhoto,
+  toogleFavorite,
   updateProductQuantity,
 } from "../conrollers/product.js";
 import authMiddlewares from "../middlewares/authMiddlewares.js";
@@ -78,12 +82,16 @@ productRouter.get("/get/brand", getBrandsTorgsoft);
 productRouter.get("/price-range", getPriceRange);
 
 productRouter.post("/favorites", authMiddlewares, addFavorite); // Додати товар
+productRouter.post("/toggle-favorite", authMiddlewares, toogleFavorite); // Додати товар
 productRouter.delete("/favorites", authMiddlewares, removeFavorite); // Видалити товар
 productRouter.get("/favorites/:userId", authMiddlewares, getFavorites); // Отримати список
 productRouter.get("/product/:slug", getProductByIdTest);
 // productRouter.get("/producttest/:slug", getProductByIdTest);
 productRouter.get("/basket", authMiddlewares, getBasket);
+productRouter.get("/cart/get/:userId", authMiddlewares, getCart);
 productRouter.post("/:slug/basket", authMiddlewares, addProductToBasket);
+productRouter.post("/cart/add", authMiddlewares, addToCart);
+productRouter.delete("/cart/remove", authMiddlewares, removeFromCart);
 productRouter.delete(
   "/basket/delete/",
   authMiddlewares,
