@@ -25,7 +25,6 @@ import {
   getOrder,
   getOrderById,
   getPriceRange,
-  getProductById,
   getProductByIdTest,
   getProducts,
   getTopSellingProducts,
@@ -36,6 +35,7 @@ import {
   sendPhoto,
   toogleFavorite,
   updateProductQuantity,
+  updateQuantityInCart,
 } from "../conrollers/product.js";
 import authMiddlewares from "../middlewares/authMiddlewares.js";
 import { getBd, getCategoriesTree } from "../conrollers/torgsoft.js";
@@ -88,10 +88,15 @@ productRouter.get("/favorites/:userId", authMiddlewares, getFavorites); // От�
 productRouter.get("/product/:slug", getProductByIdTest);
 // productRouter.get("/producttest/:slug", getProductByIdTest);
 productRouter.get("/basket", authMiddlewares, getBasket);
-productRouter.get("/cart/get/:userId", authMiddlewares, getCart);
 productRouter.post("/:slug/basket", authMiddlewares, addProductToBasket);
+productRouter.get("/cart/get/:userId", authMiddlewares, getCart);
 productRouter.post("/cart/add", authMiddlewares, addToCart);
 productRouter.delete("/cart/remove", authMiddlewares, removeFromCart);
+productRouter.patch(
+  "/cart/update-quantity",
+  authMiddlewares,
+  updateQuantityInCart
+);
 productRouter.delete(
   "/basket/delete/",
   authMiddlewares,
