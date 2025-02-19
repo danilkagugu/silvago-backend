@@ -25,7 +25,6 @@ import {
   getOrder,
   getOrderById,
   getPriceRange,
-  getProductById,
   getProductByIdTest,
   getProducts,
   getTopSellingProducts,

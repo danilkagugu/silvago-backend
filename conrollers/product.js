@@ -328,29 +328,6 @@ export const removeFavorite = async (req, res, next) => {
   }
 };
 
-export const getProductById = async (req, res, next) => {
-  const { slug } = req.params;
-  try {
-    const product = await Goods.findOne({ "variations.slug": slug });
-    // console.log("💕💕product", product);
-    if (!product) {
-      return res.status(404).send("Product not found");
-    }
-
-    // Знаходимо конкретний варіант об'єму за slug
-    const volume = product.variations.find((v) => v.slug === slug);
-    // console.log("volume: 🎁🐱‍🚀🐱‍🚀😊", volume);
-
-    if (!volume) {
-      return res.status(404).send("Volume not found");
-    }
-
-    res.status(200).json({ product, volume });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const addProductToBasket = async (req, res, next) => {
   try {
     const { quantity, volume, tone, slug } = req.body;
@@ -1383,20 +1360,29 @@ export const getProductByIdTest = async (req, res, next) => {
     }
 
     // Знаходимо конкретний варіант об'єму за slug
-    const volume = product.variations.find((v) => v.slug === slug);
+    const selectedVariation = product.variations.find((v) => v.slug === slug);
 
-    if (!volume) {
-      return res.status(404).send("Volume not found");
+    if (!selectedVariation) {
+      return res.status(404).json({ message: "Варіацію не знайдено" });
     }
     // Генеруємо хлібні крихти
     const breadcrumbs = await generateBreadcrumbs(
       product.categories,
       product,
-      volume
+      selectedVariation
     );
 
     // Відправляємо відповідь
-    res.status(200).json({ product, volume, breadcrumbs });
+    res.status(200).json({
+      productId: product._id,
+      modelName: product.modelName,
+      brand: product.brand,
+      categories: product.categories, // Вже містить `populate()`
+      measure: product.measure,
+      variations: product.variations, // Всі варіації
+      selectedVariation, // Варіація, яку обрав користувач
+      breadcrumbs,
+    });
   } catch (error) {
     next(error);
   }
