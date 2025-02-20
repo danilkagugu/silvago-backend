@@ -235,26 +235,70 @@ export const getFavorites = async (req, res, next) => {
 export const toogleFavorite = async (req, res, next) => {
   try {
     const { userId, productId, idTorgsoft } = req.body;
-    console.log("req.body: ", req.body);
+    // console.log("idTorgsoft: ", idTorgsoft);
+    // console.log("productId: ", productId);
+    // console.log("userId: ", userId);
+
     const user = await Client.findById(userId);
     // console.log("user: ", user);
     if (!user)
       return res.status(404).json({ message: "Користувач не знайдений" });
 
+    // Шукаємо конкретну варіацію
     const index = user.favorites.findIndex(
       (fav) =>
         fav.productId.toString() === productId.toString() &&
-        Number(fav.idTorgsoft) === Number(idTorgsoft) // Використовуємо Number() для чисел
+        Number(fav.idTorgsoft) === Number(idTorgsoft)
     );
     console.log("index", index);
     if (index !== -1) {
-      user.favorites.splice(index, 1); // Видаляємо
+      user.favorites.splice(index, 1); // Видаляємо лише цю варіацію
     } else {
       user.favorites.push({ productId, idTorgsoft }); // Додаємо
     }
 
     await user.save();
-    res.json(user.favorites);
+
+    // Завантажуємо повну інформацію про улюблені товари
+    const detailedFavorites = await Promise.all(
+      user.favorites.map(async (fav) => {
+        const product = await Goods.findById(fav.productId).lean();
+        if (!product) return null;
+
+        // Знаходимо обрану варіацію
+        const selectedVariation = product.variations.find(
+          (variation) => variation.idTorgsoft === fav.idTorgsoft
+        );
+
+        return {
+          ...product,
+          productId: product._id,
+          selectedVariation,
+          allVariations: product.variations,
+        };
+      })
+    );
+    console.log("detailedFavorites👌👌👌", detailedFavorites);
+
+    // Видаляємо `null`, якщо якогось товару вже немає в базі
+    res.json({ favorites: detailedFavorites.filter(Boolean) });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const clearFavorites = async (req, res, next) => {
+  try {
+    const { userId } = req.body;
+
+    const user = await Client.findById(userId);
+    if (!user)
+      return res.status(404).json({ message: "Користувач не знайдений" });
+
+    user.favorites = []; // Очищаємо список улюблених
+    await user.save();
+
+    res.json({ favorites: [] }); // Повертаємо пустий масив
   } catch (error) {
     next(error);
   }
