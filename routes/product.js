@@ -8,6 +8,7 @@ import {
   addProductToBasket,
   addToCart,
   changeProductVariation,
+  clearFavorites,
   createProduct,
   deleteFavoriteProduct,
   deleteProductFromBasket,
@@ -81,8 +82,10 @@ productRouter.get(
 productRouter.get("/get/brand", getBrandsTorgsoft);
 productRouter.get("/price-range", getPriceRange);
 
-productRouter.post("/favorites", authMiddlewares, addFavorite); // Додати товар
-productRouter.post("/toggle-favorite", authMiddlewares, toogleFavorite); // Додати товар
+productRouter.post("/favorites", authMiddlewares, addFavorite); // Додати товар в улюблене
+productRouter.post("/toggle-favorite", authMiddlewares, toogleFavorite); // Додати/видалити товар в улюблене
+productRouter.post("/favorites/clear", authMiddlewares, clearFavorites); // Видилати список улюблених
+
 productRouter.delete("/favorites", authMiddlewares, removeFavorite); // Видалити товар
 productRouter.get("/favorites/:userId", authMiddlewares, getFavorites); // Отримати список
 productRouter.get("/product/:slug", getProductByIdTest);
